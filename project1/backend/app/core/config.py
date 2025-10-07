@@ -17,6 +17,17 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+asyncpg://onlsuggest:devpassword@localhost:5433/onlsuggest"
 
+    def __init__(self, **data):
+        """Initialize settings and convert DATABASE_URL to async format."""
+        super().__init__(**data)
+        # Convert postgresql:// to postgresql+asyncpg:// for async support
+        if self.database_url.startswith("postgresql://"):
+            object.__setattr__(
+                self,
+                "database_url",
+                self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            )
+
     # Redis
     redis_url: str = "redis://localhost:6379/0"
 
