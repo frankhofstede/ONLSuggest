@@ -45,13 +45,15 @@ services:
         source: /*
         destination: /index.html
 
+  # Redis Cache
+  - type: redis
+    name: onlsuggest-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+
 databases:
   # PostgreSQL Database
   - name: onlsuggest-db
     plan: free
     databaseName: onlsuggest
     user: onlsuggest
-
-  # Redis Cache
-  - name: onlsuggest-redis
-    plan: free
