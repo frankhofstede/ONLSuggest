@@ -46,9 +46,6 @@ frontend/dist/
 frontend/build/
 frontend/.cache/
 
-# Alembic
-alembic.ini
-
 # Redis dumps
 dump.rdb
 
