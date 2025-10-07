@@ -49,9 +49,6 @@ frontend/.cache/
 # Alembic
 alembic.ini
 
-# Docker
-.dockerignore
-
 # Redis dumps
 dump.rdb
 
