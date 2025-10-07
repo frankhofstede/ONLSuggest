@@ -42,7 +42,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Health check endpoint for monitoring."""
+    """Health check endpoint for monitoring and deployment verification."""
     return {
         "status": "healthy",
         "version": "0.1.0",
