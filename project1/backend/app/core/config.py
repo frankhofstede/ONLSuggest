@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 100
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:8000", "http://localhost:3000"]
+    cors_origins: list[str] = ["*"]  # Allow all origins for demo deployment
 
     # Pagination
     default_page_size: int = 20
