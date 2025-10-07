@@ -1,0 +1,33 @@
+{
+  "name": "onlsuggest-frontend",
+  "version": "0.1.0",
+  "description": "ONLSuggest Frontend - Dutch Municipal Services Discovery",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "gemeente",
+    "dienstverlening",
+    "zoeken"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/rollup-darwin-arm64": "^4.52.4",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "^4.52.4"
+  }
+}

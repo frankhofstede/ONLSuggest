@@ -1,0 +1,135 @@
+/* Story 2.6: Responsive Design & Styling for SuggestionList */
+
+.suggestion-list {
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto 0;
+}
+
+.suggestion-list--empty {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.suggestion-list__empty-message {
+  color: #6b7280;
+  font-size: 1.125rem;
+}
+
+.suggestion-list__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.suggestion-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.suggestion-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.suggestion-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.suggestion-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.suggestion-item__question {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  flex: 1;
+}
+
+.suggestion-item__confidence {
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.suggestion-item__service {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.suggestion-item__service-name {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.suggestion-item__category {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.suggestion-item__description {
+  color: #6b7280;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Mobile responsive - Story 2.6 */
+@media (max-width: 640px) {
+  .suggestion-list {
+    margin-top: 1.5rem;
+  }
+
+  .suggestion-list__title {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+
+  .suggestion-item {
+    padding: 1.25rem;
+  }
+
+  .suggestion-item__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .suggestion-item__question {
+    font-size: 1rem;
+  }
+
+  .suggestion-item__confidence {
+    align-self: flex-start;
+  }
+}
