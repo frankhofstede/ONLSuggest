@@ -50,6 +50,7 @@ services:
     name: onlsuggest-redis
     plan: free
     maxmemoryPolicy: allkeys-lru
+    ipAllowList: []  # Allow all IPs (empty list means allow connections from any Render service)
 
 databases:
   # PostgreSQL Database
