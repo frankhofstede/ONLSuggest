@@ -16,7 +16,7 @@ alembic==1.13.0
 redis==5.0.1
 
 # NLP & Fuzzy Matching
-spacy==3.7.4
+spacy==3.8.7
 rapidfuzz==3.5.2
 
 # Authentication & Security
