@@ -26,23 +26,8 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        value: '["https://onlsuggest-frontend.onrender.com"]'
+        value: '["http://localhost:3000"]'
     healthCheckPath: /health
-
-  # Frontend (React + Vite)
-  - type: web
-    name: onlsuggest-frontend
-    runtime: static
-    buildCommand: cd project1/frontend && npm install && npm run build
-    staticPublishPath: ./project1/frontend/dist
-    pullRequestPreviewsEnabled: true
-    envVars:
-      - key: VITE_API_URL
-        value: https://onlsuggest-api.onrender.com
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
 
   # Redis Cache
   - type: redis
