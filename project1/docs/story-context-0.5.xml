@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>0.5</story-id>
+    <story-title>Backend Integration Testing &amp; Environment Validation</story-title>
+    <epic-id>0</epic-id>
+    <epic-title>Development Environment Setup</epic-title>
+    <created-date>2025-10-07</created-date>
+    <status>ContextReadyDraft</status>
+  </metadata>
+
+  <user-story>
+    <role>developer</role>
+    <action>create a minimal FastAPI application and verify full-stack integration</action>
+    <outcome>I can confirm the development environment is fully functional before starting Epic 1</outcome>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1">Basic FastAPI application created with root and health endpoints</criterion>
+    <criterion id="AC2">CORS middleware configured for frontend (http://localhost:5173)</criterion>
+    <criterion id="AC3">Database integration test endpoint created and verified</criterion>
+    <criterion id="AC4">Redis integration test endpoint created and verified</criterion>
+    <criterion id="AC5">Frontend can successfully call backend APIs</criterion>
+    <criterion id="AC6">Week 1 completion report generated showing all green checkmarks</criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac-ref="AC1 AC2">
+      <title>Create basic FastAPI application</title>
+      <subtasks>
+        <subtask id="1.1">Create backend/app/main.py</subtask>
+        <subtask id="1.2">Initialize FastAPI app with title and debug settings from config</subtask>
+        <subtask id="1.3">Add CORS middleware allowing http://localhost:5173</subtask>
+        <subtask id="1.4">Create GET / endpoint returning {"message": "ONLSuggest API is running"}</subtask>
+        <subtask id="1.5">Create GET /health endpoint returning {"status": "healthy", "version": "0.1.0"}</subtask>
+        <subtask id="1.6">Start server: uvicorn app.main:app --reload</subtask>
+        <subtask id="1.7">Test root: curl http://localhost:8000/ (should return message)</subtask>
+        <subtask id="1.8">Test health: curl http://localhost:8000/health (should return status)</subtask>
+        <subtask id="1.9">Visit http://localhost:8000/docs (verify Swagger UI)</subtask>
+      </subtasks>
+    </task>
+    <task id="2" ac-ref="AC3">
+      <title>Create database integration test endpoint</title>
+      <subtasks>
+        <subtask id="2.1">Import get_db dependency, AsyncSession, models</subtask>
+        <subtask id="2.2">Create GET /api/test/db endpoint with db dependency</subtask>
+        <subtask id="2.3">Query count of gemeentes and services using func.count()</subtask>
+        <subtask id="2.4">Return {"database": "connected", "gemeentes": count, "services": count}</subtask>
+        <subtask id="2.5">Test endpoint: curl http://localhost:8000/api/test/db</subtask>
+        <subtask id="2.6">Verify response shows gemeentes=8, services=10</subtask>
+      </subtasks>
+    </task>
+    <task id="3" ac-ref="AC4">
+      <title>Create Redis integration test endpoint</title>
+      <subtasks>
+        <subtask id="3.1">Create backend/app/core/redis_client.py with get_redis() function</subtask>
+        <subtask id="3.2">Initialize redis client from settings.redis_url</subtask>
+        <subtask id="3.3">Create GET /api/test/redis endpoint</subtask>
+        <subtask id="3.4">Test Redis by setting and getting a test key</subtask>
+        <subtask id="3.5">Return {"redis": "connected", "test_value": value}</subtask>
+        <subtask id="3.6">Test endpoint: curl http://localhost:8000/api/test/redis</subtask>
+        <subtask id="3.7">Verify response shows test_value</subtask>
+      </subtasks>
+    </task>
+    <task id="4" ac-ref="AC5">
+      <title>Frontend-backend integration test</title>
+      <subtasks>
+        <subtask id="4.1">Ensure backend is running (uvicorn app.main:app --reload)</subtask>
+        <subtask id="4.2">In new terminal, start frontend: cd frontend &amp;&amp; npm run dev</subtask>
+        <subtask id="4.3">Update frontend/src/App.tsx to test API calls</subtask>
+        <subtask id="4.4">Use useEffect to fetch /health and /api/test/db on mount</subtask>
+        <subtask id="4.5">Display results with Tailwind styling</subtask>
+        <subtask id="4.6">Visit http://localhost:5173</subtask>
+        <subtask id="4.7">Verify page shows API health and database stats</subtask>
+        <subtask id="4.8">Check browser console for errors (should be none)</subtask>
+      </subtasks>
+    </task>
+    <task id="5" ac-ref="AC6">
+      <title>Create and run Week 1 completion report</title>
+      <subtasks>
+        <subtask id="5.1">Create backend/scripts/week1_report.py</subtask>
+        <subtask id="5.2">Check database connection and query counts</subtask>
+        <subtask id="5.3">Check Redis connection</subtask>
+        <subtask id="5.4">Check installed dependencies (fastapi, sqlalchemy, spacy versions)</subtask>
+        <subtask id="5.5">Check Dutch NLP model loads</subtask>
+        <subtask id="5.6">Print formatted report with ✅ checkmarks</subtask>
+        <subtask id="5.7">Run report: cd backend &amp;&amp; python scripts/week1_report.py</subtask>
+        <subtask id="5.8">Verify all items show ✅ (green checkmarks)</subtask>
+        <subtask id="5.9">Save screenshot or output to docs/</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <document-references>
+      <document>
+        <path>docs/solution-architecture.md</path>
+        <relevant-sections>
+          <section>Backend Framework: FastAPI 0.109.0 - Async performance, auto docs</section>
+          <section>ASGI Server: Uvicorn 0.27.0 - Production server for FastAPI</section>
+          <section>CORS Configuration - Allow http://localhost:5173</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/week-1-setup-checklist.md</path>
+        <relevant-sections>
+          <section>Day 5: FastAPI Backend &amp; Testing - Complete integration testing instructions</section>
+          <section>Task 5.1: Basic FastAPI Application</section>
+          <section>Task 5.2: Test Database Integration</section>
+          <section>Task 5.3: Test Redis Integration</section>
+          <section>Task 5.4: Frontend-Backend Integration Test</section>
+          <section>Task 5.5: Create Week 1 Completion Report</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/tech-spec-epic-1.md</path>
+        <relevant-sections>
+          <section>API Contracts - Endpoint patterns and response formats</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/PRD.md</path>
+        <relevant-sections>
+          <section>NFR004: Graceful degradation - Error handling requirement</section>
+        </relevant-sections>
+      </document>
+    </document-references>
+
+    <dependencies>
+      <dependency>
+        <name>fastapi</name>
+        <version>0.109.0</version>
+        <reason>Async web framework for REST API</reason>
+      </dependency>
+      <dependency>
+        <name>uvicorn</name>
+        <version>0.27.0</version>
+        <reason>ASGI server to run FastAPI application</reason>
+      </dependency>
+      <dependency>
+        <name>CORSMiddleware</name>
+        <version>Built into FastAPI</version>
+        <reason>Cross-Origin Resource Sharing for frontend access</reason>
+      </dependency>
+    </dependencies>
+
+    <interfaces>
+      <interface type="rest-api">
+        <description>FastAPI REST API endpoints</description>
+        <endpoints>
+          <endpoint method="GET" path="/">Root endpoint - {"message": "ONLSuggest API is running"}</endpoint>
+          <endpoint method="GET" path="/health">Health check - {"status": "healthy", "version": "0.1.0"}</endpoint>
+          <endpoint method="GET" path="/api/test/db">Database test - {"database": "connected", "gemeentes": 8, "services": 10}</endpoint>
+          <endpoint method="GET" path="/api/test/redis">Redis test - {"redis": "connected", "test_value": "..."}</endpoint>
+          <endpoint method="GET" path="/docs">Swagger UI documentation</endpoint>
+        </endpoints>
+      </interface>
+      <interface type="cors">
+        <description>CORS middleware configuration</description>
+        <allowed-origins>http://localhost:5173 (Vite dev server)</allowed-origins>
+        <allowed-methods>GET, POST, PUT, DELETE (all)</allowed-methods>
+        <allowed-headers>All (*)</allowed-headers>
+        <allow-credentials>True</allow-credentials>
+      </interface>
+    </interfaces>
+  </artifacts>
+
+  <constraints>
+    <constraint type="technical">
+      <description>CORS must allow http://localhost:5173 for frontend development</description>
+      <reason>Vite dev server runs on port 5173, backend on port 8000</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>Test endpoints /api/test/* are temporary for POC validation</description>
+      <reason>These endpoints should be removed before production deployment</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>FastAPI app must use settings from config.py</description>
+      <reason>title, debug mode, and other settings centralized in configuration</reason>
+    </constraint>
+    <constraint type="validation">
+      <description>Week 1 report must show all green checkmarks before proceeding</description>
+      <reason>Confirms complete environment setup required for Epic 1 development</reason>
+    </constraint>
+  </constraints>
+
+  <test-ideas>
+    <test id="T1" ac-ref="AC1">
+      <description>Verify FastAPI server starts</description>
+      <command>uvicorn app.main:app --reload</command>
+      <expected>Server starts on http://localhost:8000</expected>
+    </test>
+    <test id="T2" ac-ref="AC1">
+      <description>Verify root endpoint responds</description>
+      <command>curl http://localhost:8000/</command>
+      <expected>{"message":"ONLSuggest API is running"}</expected>
+    </test>
+    <test id="T3" ac-ref="AC1">
+      <description>Verify health endpoint responds</description>
+      <command>curl http://localhost:8000/health</command>
+      <expected>{"status":"healthy","version":"0.1.0"}</expected>
+    </test>
+    <test id="T4" ac-ref="AC1">
+      <description>Verify Swagger docs accessible</description>
+      <command>curl -I http://localhost:8000/docs</command>
+      <expected>HTTP/1.1 200 OK</expected>
+    </test>
+    <test id="T5" ac-ref="AC2">
+      <description>Verify CORS headers present for Vite origin</description>
+      <command>curl -H "Origin: http://localhost:5173" -I http://localhost:8000/health</command>
+      <expected>Access-Control-Allow-Origin: http://localhost:5173</expected>
+    </test>
+    <test id="T6" ac-ref="AC3">
+      <description>Verify database test endpoint returns correct counts</description>
+      <command>curl http://localhost:8000/api/test/db</command>
+      <expected>{"database":"connected","gemeentes":8,"services":10}</expected>
+    </test>
+    <test id="T7" ac-ref="AC4">
+      <description>Verify Redis test endpoint works</description>
+      <command>curl http://localhost:8000/api/test/redis</command>
+      <expected>{"redis":"connected","test_value":"Hello from ONLSuggest!"}</expected>
+    </test>
+    <test id="T8" ac-ref="AC5">
+      <description>Verify frontend displays backend data</description>
+      <command>Visit http://localhost:5173 in browser</command>
+      <expected>Page shows health status and database stats</expected>
+    </test>
+    <test id="T9" ac-ref="AC5">
+      <description>Verify no CORS errors in browser console</description>
+      <command>Open browser DevTools console on http://localhost:5173</command>
+      <expected>No CORS-related errors</expected>
+    </test>
+    <test id="T10" ac-ref="AC6">
+      <description>Verify Week 1 report shows all green checkmarks</description>
+      <command>python backend/scripts/week1_report.py</command>
+      <expected>All sections show ✅, final message: "Week 1 Setup Complete - Ready for Epic 1 Development!"</expected>
+    </test>
+  </test-ideas>
+
+  <implementation-notes>
+    <note>
+      <title>FastAPI Minimal Setup</title>
+      <content>main.py contains single FastAPI app instance with CORS middleware, root endpoint, health check, and test endpoints. Automatic OpenAPI docs at /docs. Debug mode enabled via settings.debug for development.</content>
+    </note>
+    <note>
+      <title>CORS Configuration</title>
+      <content>CORSMiddleware allows http://localhost:5173 (Vite dev server). Credentials, all methods (*), all headers (*) enabled for POC. Production should restrict to specific methods/headers.</content>
+    </note>
+    <note>
+      <title>Integration Test Endpoints</title>
+      <content>/api/test/db verifies PostgreSQL connection and seeded data counts. /api/test/redis verifies Redis set/get operations. These are temporary endpoints for environment validation - remove before production.</content>
+    </note>
+    <note>
+      <title>Frontend Test Component</title>
+      <content>App.tsx updated to fetch /health and /api/test/db on mount using useEffect. Results displayed in Tailwind-styled cards. Loading/error states handled gracefully.</content>
+    </note>
+    <note>
+      <title>Week 1 Completion Report</title>
+      <content>week1_report.py checks: 1) Database (8 gemeentes, 10 services, 80 associations, 1 admin), 2) Redis working, 3) Dependencies (FastAPI, SQLAlchemy, spaCy, bcrypt versions), 4) Dutch NLP model loads. All sections must show ✅ before proceeding to Epic 1.</content>
+    </note>
+    <note>
+      <title>Expected Output Format</title>
+      <content>Report prints formatted table with ✅ checkmarks for each verification. Final message: "🎉 Week 1 Setup Complete - Ready for Epic 1 Development!" indicates all environment setup tasks completed successfully.</content>
+    </note>
+  </implementation-notes>
+
+  <dev-agent-record>
+    <context-generation>
+      <agent-model>claude-sonnet-4-5-20250929</agent-model>
+      <generated-date>2025-10-07</generated-date>
+      <user-name>Frank</user-name>
+    </context-generation>
+  </dev-agent-record>
+</story-context>

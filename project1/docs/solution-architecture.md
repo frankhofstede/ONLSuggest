@@ -580,28 +580,32 @@ The architecture naturally separates along these axes:
 
 ---
 
-### Database: SQLite
+### Database: PostgreSQL
 
-**Decision:** SQLite (file-based SQL database)
+**Decision:** PostgreSQL (production-grade relational database)
 
-**Version:** SQLite 3.40+ (bundled with Python)
+**Version:** PostgreSQL 15+
 
 **Rationale:**
-- **POC-appropriate:** Perfect for 50 gemeentes, 100 services, 10-50 concurrent users
-- **Zero configuration:** No separate database server to manage
-- **Portability:** Single file database, easy to backup/copy
-- **Full-text search:** FTS5 extension supports Dutch text search
-- **Performance:** Fast for read-heavy workloads (suggestion queries)
-- **Deployment simplicity:** Works on Render without additional services
+- **Production-ready:** Industry standard for web applications
+- **Excellent concurrency:** MVCC handles multiple concurrent writes without lock contention
+- **Full-text search:** Native full-text search with GIN indexes for Dutch text
+- **Data integrity:** ACID compliance, foreign keys, constraints fully enforced
+- **Scalability:** Handles growth from POC (50 gemeentes, 100 services) to production scale
+- **Deployment support:** Native support on Render, Heroku, AWS RDS, and all major platforms
+- **Rich ecosystem:** pgAdmin, pg_stat_statements, robust backup/restore tools
 
-**Performance considerations:**
-- Write concurrency handled by connection pooling
-- Read performance excellent for POC scale
-- Can migrate to PostgreSQL later if scale demands it
+**Performance characteristics:**
+- **Write concurrency:** Superior to SQLite for multi-user environments
+- **Read performance:** Excellent with proper indexing
+- **Connection pooling:** Handled by SQLAlchemy async engine
+- **Full-text search:** GIN indexes with `tsvector` for Dutch text
 
-**Migration path:**
-- SQLAlchemy abstracts database, making PostgreSQL migration straightforward
-- Keep schema design PostgreSQL-compatible from start
+**Why PostgreSQL over SQLite:**
+- Better concurrency for admin CRUD operations (multiple admins editing simultaneously)
+- Avoid SQLite write lock limitations
+- Production-ready from day 1 (no migration needed)
+- Deployment platforms expect PostgreSQL (industry standard)
 
 ---
 
@@ -620,7 +624,7 @@ The architecture naturally separates along these axes:
 
 **Additional tools:**
 - **Alembic 1.13.0** - Database migration management
-- **aiosqlite 0.19.0** - Async SQLite driver for FastAPI
+- **asyncpg 0.29.0** - High-performance async PostgreSQL driver for FastAPI
 
 ---
 
@@ -783,9 +787,9 @@ UI State (Context API):
 |----------|-----------|---------|-----------|
 | **Backend Framework** | FastAPI | 0.109.0 | Async performance, auto docs, type safety |
 | **Backend Language** | Python | 3.11+ | User expertise |
-| **Database** | SQLite | 3.40+ | POC-appropriate, zero config, portable |
+| **Database** | PostgreSQL | 15+ | Production-ready, excellent concurrency |
 | **ORM** | SQLAlchemy | 2.0.25 | Mature, async support, migration tools |
-| **Database Driver** | aiosqlite | 0.19.0 | Async SQLite for FastAPI |
+| **Database Driver** | asyncpg | 0.29.0 | High-performance async PostgreSQL |
 | **Migrations** | Alembic | 1.13.0 | Schema versioning |
 | **ASGI Server** | Uvicorn | 0.27.0 | FastAPI production server |
 | **Primary Cache** | functools.lru_cache | Built-in | In-memory, fastest |
@@ -822,18 +826,20 @@ UI State (Context API):
 
 ---
 
-**ADR-002: SQLite over PostgreSQL for POC**
+**ADR-002: PostgreSQL for Production-Ready POC**
 
-**Context:** Need database for 50 gemeentes, 100 services, 10-50 concurrent users
+**Context:** Need database for 50 gemeentes, 100 services, 10-50 concurrent users, with production deployment intent
 
-**Decision:** SQLite with migration path to PostgreSQL
+**Decision:** PostgreSQL 15+ with native full-text search
 
 **Consequences:**
-- ✅ Zero configuration, single file portability
-- ✅ Deployment simplicity (no separate DB service)
-- ✅ Fast for POC scale
-- ⚠️ Write concurrency limitations (acceptable for POC)
-- ✅ Easy PostgreSQL migration via SQLAlchemy abstraction
+- ✅ Production-ready from day 1 (no migration needed)
+- ✅ Excellent write concurrency for multi-admin scenarios
+- ✅ Native full-text search with GIN indexes for Dutch
+- ✅ Industry standard with robust tooling (pgAdmin, monitoring)
+- ✅ Deployment platform native support (Render, Heroku, AWS RDS)
+- ⚠️ Requires separate database service (local: Docker/Homebrew, cloud: Render addon)
+- ⚠️ Slightly more complex local setup (mitigated by Docker Compose)
 
 ---
 
@@ -1048,21 +1054,27 @@ CREATE INDEX idx_services_keywords ON services(keywords);
 CREATE INDEX idx_associations_gemeente ON gemeente_service_associations(gemeente_id);
 CREATE INDEX idx_associations_service ON gemeente_service_associations(service_id);
 
--- Full-text search (SQLite FTS5)
-CREATE VIRTUAL TABLE services_fts USING fts5(
-    service_id UNINDEXED,
-    name,
-    description,
-    keywords,
-    content='services',
-    content_rowid='id'
-);
+-- Full-text search (PostgreSQL native)
+-- Add tsvector column for Dutch full-text search
+ALTER TABLE services ADD COLUMN search_vector tsvector;
 
--- Triggers to keep FTS in sync
-CREATE TRIGGER services_fts_insert AFTER INSERT ON services BEGIN
-    INSERT INTO services_fts(service_id, name, description, keywords)
-    VALUES (new.id, new.name, new.description, new.keywords);
-END;
+-- Create GIN index for fast full-text queries
+CREATE INDEX idx_services_search ON services USING GIN(search_vector);
+
+-- Trigger to automatically update search_vector
+CREATE FUNCTION services_search_vector_trigger() RETURNS trigger AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('dutch', COALESCE(NEW.name, '')), 'A') ||
+    setweight(to_tsvector('dutch', COALESCE(NEW.description, '')), 'B') ||
+    setweight(to_tsvector('dutch', COALESCE(NEW.keywords, '')), 'C');
+  RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER services_search_update
+  BEFORE INSERT OR UPDATE ON services
+  FOR EACH ROW EXECUTE FUNCTION services_search_vector_trigger();
 ```
 
 **Sample Data:**

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>0.2</story-id>
+    <story-title>Database Setup &amp; Configuration</story-title>
+    <epic-id>0</epic-id>
+    <epic-title>Development Environment Setup</epic-title>
+    <created-date>2025-10-07</created-date>
+    <status>ContextReadyDraft</status>
+  </metadata>
+
+  <user-story>
+    <role>developer</role>
+    <action>set up PostgreSQL database with SQLAlchemy models and Alembic migrations</action>
+    <outcome>I have a working database foundation for storing gemeentes, services, and admin users</outcome>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1">PostgreSQL 15+ running locally (Docker or Homebrew)</criterion>
+    <criterion id="AC2">Application configuration setup (config.py, .env file)</criterion>
+    <criterion id="AC3">Four SQLAlchemy models created (Gemeente, Service, Association, AdminUser)</criterion>
+    <criterion id="AC4">Database connection setup with async engine</criterion>
+    <criterion id="AC5">Alembic migrations configured and initial migration created</criterion>
+    <criterion id="AC6">Database tables created and verified (5 tables total including alembic_version)</criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac-ref="AC1">
+      <title>Install and start PostgreSQL</title>
+      <subtasks>
+        <subtask id="1.1">Choose installation method (Docker recommended or Homebrew)</subtask>
+        <subtask id="1.2">Docker option: Create docker-compose.yml with PostgreSQL 15 + Redis 7</subtask>
+        <subtask id="1.3">Docker option: Start services: docker-compose up -d</subtask>
+        <subtask id="1.4">Homebrew option: Install PostgreSQL: brew install postgresql@15</subtask>
+        <subtask id="1.5">Homebrew option: Start service: brew services start postgresql@15</subtask>
+        <subtask id="1.6">Homebrew option: Create database: createdb onlsuggest</subtask>
+        <subtask id="1.7">Verify PostgreSQL running: psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT version();"</subtask>
+      </subtasks>
+    </task>
+    <task id="2" ac-ref="AC2">
+      <title>Create application configuration</title>
+      <subtasks>
+        <subtask id="2.1">Create backend/app/core/config.py with Settings class using pydantic-settings</subtask>
+        <subtask id="2.2">Add database_url, redis_url, secret_key, admin credentials, app settings</subtask>
+        <subtask id="2.3">Create backend/.env with PostgreSQL connection string</subtask>
+        <subtask id="2.4">Verify .env is in .gitignore</subtask>
+        <subtask id="2.5">Test config loads: python -c "from app.core.config import settings; print(settings.database_url)"</subtask>
+      </subtasks>
+    </task>
+    <task id="3" ac-ref="AC3">
+      <title>Create SQLAlchemy models</title>
+      <subtasks>
+        <subtask id="3.1">Create backend/app/models/base.py with declarative_base</subtask>
+        <subtask id="3.2">Create backend/app/models/gemeente.py (id, name, description, timestamps)</subtask>
+        <subtask id="3.3">Create backend/app/models/service.py (id, name, description, keywords, category, timestamps)</subtask>
+        <subtask id="3.4">Create backend/app/models/association.py (id, gemeente_id, service_id, timestamps, unique constraint)</subtask>
+        <subtask id="3.5">Create backend/app/models/admin_user.py (id, username, password_hash, created_at, last_login)</subtask>
+        <subtask id="3.6">Create backend/app/models/__init__.py to export all models</subtask>
+        <subtask id="3.7">Verify imports work: python -c "from app.models import Gemeente, Service; print('Models imported')"</subtask>
+      </subtasks>
+    </task>
+    <task id="4" ac-ref="AC4">
+      <title>Set up database connection</title>
+      <subtasks>
+        <subtask id="4.1">Create backend/app/core/database.py</subtask>
+        <subtask id="4.2">Create async engine with create_async_engine (settings.database_url, echo=debug)</subtask>
+        <subtask id="4.3">Create async_session_maker with sessionmaker(AsyncSession)</subtask>
+        <subtask id="4.4">Create get_db() dependency function for FastAPI</subtask>
+        <subtask id="4.5">Create init_db() function to create all tables</subtask>
+        <subtask id="4.6">Test import: python -c "from app.core.database import engine; print('Database connection configured')"</subtask>
+      </subtasks>
+    </task>
+    <task id="5" ac-ref="AC5">
+      <title>Configure Alembic migrations</title>
+      <subtasks>
+        <subtask id="5.1">Initialize Alembic: alembic init alembic</subtask>
+        <subtask id="5.2">Edit alembic.ini - comment out sqlalchemy.url line</subtask>
+        <subtask id="5.3">Edit alembic/env.py - import models, set target_metadata = Base.metadata</subtask>
+        <subtask id="5.4">Update env.py - replace aiosqlite references with asyncpg/psycopg2 conversions</subtask>
+        <subtask id="5.5">Create initial migration: alembic revision --autogenerate -m "Initial schema"</subtask>
+        <subtask id="5.6">Review generated migration file in alembic/versions/</subtask>
+      </subtasks>
+    </task>
+    <task id="6" ac-ref="AC6">
+      <title>Apply migration and verify database</title>
+      <subtasks>
+        <subtask id="6.1">Run migration: alembic upgrade head</subtask>
+        <subtask id="6.2">Verify tables created: psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "\dt"</subtask>
+        <subtask id="6.3">Confirm 5 tables: admin_users, gemeentes, services, gemeente_service_associations, alembic_version</subtask>
+        <subtask id="6.4">Check table structure: psql ... -c "\d gemeentes"</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <document-references>
+      <document>
+        <path>docs/solution-architecture.md</path>
+        <relevant-sections>
+          <section>Database: PostgreSQL 15+ - Production-ready, excellent concurrency, native full-text search</section>
+          <section>ORM: SQLAlchemy 2.0.25 - Async support, migration tools</section>
+          <section>Data Architecture - Complete database schema with ERD</section>
+          <section>ADR-002: PostgreSQL for Production-Ready POC</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/week-1-setup-checklist.md</path>
+        <relevant-sections>
+          <section>Day 2: Database &amp; Configuration - Complete PostgreSQL setup instructions</section>
+          <section>Task 2.1: PostgreSQL Database Setup (Docker Compose + Homebrew options)</section>
+          <section>Task 2.2: Database Models - SQLAlchemy model code</section>
+          <section>Task 2.3: Database Connection Setup</section>
+          <section>Task 2.4: Alembic Migration Setup</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/tech-spec-epic-2.md</path>
+        <relevant-sections>
+          <section>Models - Complete SQLAlchemy model implementations</section>
+        </relevant-sections>
+      </document>
+    </document-references>
+
+    <dependencies>
+      <dependency>
+        <name>PostgreSQL</name>
+        <version>15+</version>
+        <reason>Production-grade database with MVCC, native full-text search</reason>
+      </dependency>
+      <dependency>
+        <name>sqlalchemy</name>
+        <version>2.0.25</version>
+        <reason>Async ORM with declarative models</reason>
+      </dependency>
+      <dependency>
+        <name>asyncpg</name>
+        <version>0.29.0</version>
+        <reason>High-performance async PostgreSQL driver for FastAPI</reason>
+      </dependency>
+      <dependency>
+        <name>psycopg2-binary</name>
+        <version>2.9.9</version>
+        <reason>Sync PostgreSQL driver for Alembic migrations</reason>
+      </dependency>
+      <dependency>
+        <name>alembic</name>
+        <version>1.13.0</version>
+        <reason>Database schema versioning and migrations</reason>
+      </dependency>
+      <dependency>
+        <name>pydantic-settings</name>
+        <version>2.1.0</version>
+        <reason>Configuration management with .env support</reason>
+      </dependency>
+    </dependencies>
+
+    <interfaces>
+      <interface type="database">
+        <description>PostgreSQL database with 4 core tables</description>
+        <connection-string>postgresql+asyncpg://onlsuggest:devpassword@localhost:5432/onlsuggest</connection-string>
+        <tables>
+          <table name="gemeentes">
+            <columns>id (PK), name (unique), description, created_at, updated_at</columns>
+          </table>
+          <table name="services">
+            <columns>id (PK), name (unique), description, keywords, category, created_at, updated_at</columns>
+          </table>
+          <table name="gemeente_service_associations">
+            <columns>id (PK), gemeente_id (FK), service_id (FK), created_at</columns>
+            <constraint>UNIQUE(gemeente_id, service_id)</constraint>
+          </table>
+          <table name="admin_users">
+            <columns>id (PK), username (unique), password_hash, created_at, last_login</columns>
+          </table>
+          <table name="alembic_version">
+            <columns>version_num (PK)</columns>
+          </table>
+        </tables>
+      </interface>
+      <interface type="configuration">
+        <description>Application settings from .env file</description>
+        <settings>
+          <setting>DATABASE_URL - PostgreSQL connection string</setting>
+          <setting>REDIS_URL - Redis connection string</setting>
+          <setting>SECRET_KEY - Application secret key</setting>
+          <setting>ADMIN_USERNAME - Default admin username</setting>
+          <setting>ADMIN_PASSWORD - Default admin password</setting>
+          <setting>DEBUG - Enable debug mode</setting>
+        </settings>
+      </interface>
+    </interfaces>
+  </artifacts>
+
+  <constraints>
+    <constraint type="technical">
+      <description>PostgreSQL version must be 15 or higher</description>
+      <reason>Required for native full-text search features and performance improvements</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>Alembic must use psycopg2 (sync) driver, not asyncpg</description>
+      <reason>Alembic does not support async drivers - must convert asyncpg URL to psycopg2 format</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>All models must inherit from Base (declarative_base)</description>
+      <reason>Required for Alembic autogenerate to detect models</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>Use server_default=func.now() for timestamps</description>
+      <reason>Database-side default ensures consistency</reason>
+    </constraint>
+    <constraint type="security">
+      <description>.env file must be excluded from git</description>
+      <reason>Contains sensitive credentials (database password, secret keys)</reason>
+    </constraint>
+    <constraint type="data-integrity">
+      <description>Foreign keys must have CASCADE delete</description>
+      <reason>Deleting gemeente/service should remove associations</reason>
+    </constraint>
+  </constraints>
+
+  <test-ideas>
+    <test id="T1" ac-ref="AC1">
+      <description>Verify PostgreSQL server running</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT version();"</command>
+      <expected>PostgreSQL 15.x output</expected>
+    </test>
+    <test id="T2" ac-ref="AC1">
+      <description>Verify Docker services running (if Docker option)</description>
+      <command>docker-compose ps</command>
+      <expected>postgres and redis containers up</expected>
+    </test>
+    <test id="T3" ac-ref="AC2">
+      <description>Verify config loads database URL</description>
+      <command>python -c "from app.core.config import settings; print(settings.database_url)"</command>
+      <expected>postgresql+asyncpg://onlsuggest:devpassword@localhost:5432/onlsuggest</expected>
+    </test>
+    <test id="T4" ac-ref="AC2">
+      <description>Verify .env file excluded from git</description>
+      <command>git check-ignore backend/.env</command>
+      <expected>backend/.env (file is ignored)</expected>
+    </test>
+    <test id="T5" ac-ref="AC3">
+      <description>Verify models import successfully</description>
+      <command>python -c "from app.models import Gemeente, Service, GemeenteServiceAssociation, AdminUser; print('All models imported')"</command>
+      <expected>All models imported</expected>
+    </test>
+    <test id="T6" ac-ref="AC4">
+      <description>Verify database engine created</description>
+      <command>python -c "from app.core.database import engine; print('Engine created')"</command>
+      <expected>Engine created (no errors)</expected>
+    </test>
+    <test id="T7" ac-ref="AC5">
+      <description>Verify Alembic initialized</description>
+      <command>ls alembic/versions</command>
+      <expected>Directory exists</expected>
+    </test>
+    <test id="T8" ac-ref="AC5">
+      <description>Verify initial migration created</description>
+      <command>ls alembic/versions/*.py</command>
+      <expected>One migration file present</expected>
+    </test>
+    <test id="T9" ac-ref="AC6">
+      <description>Verify tables created in database</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "\dt"</command>
+      <expected>5 tables: admin_users, gemeentes, services, gemeente_service_associations, alembic_version</expected>
+    </test>
+    <test id="T10" ac-ref="AC6">
+      <description>Verify gemeentes table structure</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "\d gemeentes"</command>
+      <expected>Columns: id, name, description, created_at, updated_at with correct types</expected>
+    </test>
+  </test-ideas>
+
+  <implementation-notes>
+    <note>
+      <title>PostgreSQL vs SQLite Decision</title>
+      <content>Architecture changed from SQLite to PostgreSQL 15+ for production-readiness, better concurrency (MVCC), and native full-text search. Docker Compose simplifies local setup with postgres:15-alpine and redis:7-alpine.</content>
+    </note>
+    <note>
+      <title>Async SQLAlchemy Pattern</title>
+      <content>Use create_async_engine with asyncpg driver. All database operations use AsyncSession with async/await. FastAPI dependency get_db() yields sessions for route handlers.</content>
+    </note>
+    <note>
+      <title>Alembic URL Conversion</title>
+      <content>Alembic requires sync driver (psycopg2). Convert asyncpg URL: database_url.replace('+asyncpg', '').replace('postgresql', 'postgresql+psycopg2')</content>
+    </note>
+    <note>
+      <title>Database Schema Design</title>
+      <content>4 core tables: gemeentes (municipalities), services (government services), gemeente_service_associations (many-to-many junction), admin_users (authentication). Unique constraint on (gemeente_id, service_id) prevents duplicate associations.</content>
+    </note>
+    <note>
+      <title>Timestamps Pattern</title>
+      <content>Use server_default=func.now() for created_at and onupdate=func.now() for updated_at. Database-side defaults ensure consistency.</content>
+    </note>
+    <note>
+      <title>Docker Compose Benefits</title>
+      <content>Single docker-compose.yml defines both PostgreSQL and Redis. Persistent volumes prevent data loss on restart. Port mapping: 5432 (PostgreSQL), 6379 (Redis).</content>
+    </note>
+  </implementation-notes>
+
+  <dev-agent-record>
+    <context-generation>
+      <agent-model>claude-sonnet-4-5-20250929</agent-model>
+      <generated-date>2025-10-07</generated-date>
+      <user-name>Frank</user-name>
+    </context-generation>
+  </dev-agent-record>
+</story-context>

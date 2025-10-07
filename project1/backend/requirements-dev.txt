@@ -1,0 +1,19 @@
+# ONLSuggest Backend Development Dependencies
+# Testing, linting, formatting, and code quality tools
+
+# Testing Framework & Coverage
+pytest==7.4.0
+pytest-asyncio==0.21.0
+pytest-cov==4.1.0
+
+# Code Formatting
+black==23.12.0
+
+# Linting
+flake8==7.0.0
+
+# Type Checking
+mypy==1.8.0
+
+# Load Testing
+locust==2.20.0

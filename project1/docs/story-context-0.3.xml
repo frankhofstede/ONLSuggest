@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>0.3</story-id>
+    <story-title>Redis, Admin User &amp; Seed Data Scripts</story-title>
+    <epic-id>0</epic-id>
+    <epic-title>Development Environment Setup</epic-title>
+    <created-date>2025-10-07</created-date>
+    <status>ContextReadyDraft</status>
+  </metadata>
+
+  <user-story>
+    <role>developer</role>
+    <action>set up Redis caching, create admin user script, and seed initial data</action>
+    <outcome>I have a working system with test data ready for development</outcome>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1">Redis 7.2 installed and running (locally or Docker)</criterion>
+    <criterion id="AC2">Redis connection verified from Python</criterion>
+    <criterion id="AC3">Security service created for password hashing (bcrypt)</criterion>
+    <criterion id="AC4">Admin user creation script completed and executed</criterion>
+    <criterion id="AC5">Seed data script created with 8 gemeentes, 10 services, 80 associations</criterion>
+    <criterion id="AC6">Database populated and verified (98 total records)</criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac-ref="AC1 AC2">
+      <title>Install and verify Redis</title>
+      <subtasks>
+        <subtask id="1.1">If Docker: Redis already running from docker-compose.yml (Story 0.2)</subtask>
+        <subtask id="1.2">If Homebrew: Install Redis: brew install redis</subtask>
+        <subtask id="1.3">If Homebrew: Start Redis: brew services start redis</subtask>
+        <subtask id="1.4">Verify Redis running: redis-cli ping (should return PONG)</subtask>
+        <subtask id="1.5">Create backend/test_redis.py script to test Python connection</subtask>
+        <subtask id="1.6">Run test: python test_redis.py (should print "Redis test: Hello Redis!")</subtask>
+      </subtasks>
+    </task>
+    <task id="2" ac-ref="AC3">
+      <title>Create security service for password hashing</title>
+      <subtasks>
+        <subtask id="2.1">Create backend/app/core/security.py</subtask>
+        <subtask id="2.2">Implement SecurityService.hash_password() using bcrypt</subtask>
+        <subtask id="2.3">Implement SecurityService.verify_password() for authentication</subtask>
+        <subtask id="2.4">Implement SecurityService.generate_session_token() using secrets module</subtask>
+        <subtask id="2.5">Implement SecurityService.create_session_data() for Redis sessions</subtask>
+        <subtask id="2.6">Test: python -c "from app.core.security import SecurityService; print(SecurityService.hash_password('test'))"</subtask>
+      </subtasks>
+    </task>
+    <task id="3" ac-ref="AC4">
+      <title>Create admin user creation script</title>
+      <subtasks>
+        <subtask id="3.1">Create backend/scripts/create_admin.py</subtask>
+        <subtask id="3.2">Import SecurityService, AdminUser model, database session</subtask>
+        <subtask id="3.3">Implement check for existing admin user</subtask>
+        <subtask id="3.4">Create admin with hashed password from config (admin/changeme123)</subtask>
+        <subtask id="3.5">Print success message with credentials</subtask>
+        <subtask id="3.6">Run script: cd backend &amp;&amp; python scripts/create_admin.py</subtask>
+        <subtask id="3.7">Verify admin created: psql ... -c "SELECT username FROM admin_users;"</subtask>
+      </subtasks>
+    </task>
+    <task id="4" ac-ref="AC5">
+      <title>Create seed data script</title>
+      <subtasks>
+        <subtask id="4.1">Create backend/scripts/seed_data.py</subtask>
+        <subtask id="4.2">Define 8 gemeentes (Amsterdam, Rotterdam, Utrecht, Den Haag, Eindhoven, Groningen, Tilburg, Almere)</subtask>
+        <subtask id="4.3">Define 10 services (Parkeervergunning, Paspoort, Rijbewijs, Afvalcontainer, Verhuizing, Bouwvergunning, Huwelijk, Kinderopvang toeslag, Uittreksel GBA, Kapvergunning boom)</subtask>
+        <subtask id="4.4">Add Dutch keywords for each service</subtask>
+        <subtask id="4.5">Implement check for existing data (skip if already seeded)</subtask>
+        <subtask id="4.6">Create all gemeentes, flush to get IDs</subtask>
+        <subtask id="4.7">Create all services, flush to get IDs</subtask>
+        <subtask id="4.8">Create all associations (8 gemeentes × 10 services = 80 associations)</subtask>
+        <subtask id="4.9">Print summary statistics</subtask>
+      </subtasks>
+    </task>
+    <task id="5" ac-ref="AC6">
+      <title>Run seed data script and verify</title>
+      <subtasks>
+        <subtask id="5.1">Run script: cd backend &amp;&amp; python scripts/seed_data.py</subtask>
+        <subtask id="5.2">Verify gemeentes: psql ... -c "SELECT COUNT(*) FROM gemeentes;" (should be 8)</subtask>
+        <subtask id="5.3">Verify services: psql ... -c "SELECT COUNT(*) FROM services;" (should be 10)</subtask>
+        <subtask id="5.4">Verify associations: psql ... -c "SELECT COUNT(*) FROM gemeente_service_associations;" (should be 80)</subtask>
+        <subtask id="5.5">Spot check data: psql ... -c "SELECT name FROM gemeentes LIMIT 3;"</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <document-references>
+      <document>
+        <path>docs/solution-architecture.md</path>
+        <relevant-sections>
+          <section>Secondary Cache: Redis 7.2 - Cross-request caching, sessions, rate limiting</section>
+          <section>Password Hashing: bcrypt 4.1.2 - Secure password storage</section>
+          <section>Database Schema - Sample seed data structure</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/week-1-setup-checklist.md</path>
+        <relevant-sections>
+          <section>Day 3: Redis, Scripts &amp; Seed Data - Complete setup instructions</section>
+          <section>Task 3.1: Redis Installation &amp; Setup</section>
+          <section>Task 3.2: Create Admin User Script</section>
+          <section>Task 3.3: Create Seed Data Script</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/tech-spec-epic-1.md</path>
+        <relevant-sections>
+          <section>Sample Data - 8 gemeentes and 10 services with Dutch keywords</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/tech-spec-epic-2.md</path>
+        <relevant-sections>
+          <section>Security Service - Password hashing implementation</section>
+        </relevant-sections>
+      </document>
+    </document-references>
+
+    <dependencies>
+      <dependency>
+        <name>Redis</name>
+        <version>7.2</version>
+        <reason>Caching layer for suggestions, admin sessions, rate limiting</reason>
+      </dependency>
+      <dependency>
+        <name>redis-py</name>
+        <version>5.0.1</version>
+        <reason>Python async Redis client</reason>
+      </dependency>
+      <dependency>
+        <name>bcrypt</name>
+        <version>4.1.2</version>
+        <reason>Secure password hashing with auto-generated salts</reason>
+      </dependency>
+    </dependencies>
+
+    <interfaces>
+      <interface type="redis">
+        <description>Redis server for caching and sessions</description>
+        <connection-string>redis://localhost:6379</connection-string>
+        <usage-patterns>
+          <pattern>Suggestion caching - 5 minute TTL</pattern>
+          <pattern>Admin sessions - 24 hour expiry</pattern>
+          <pattern>Rate limiting - API request tracking</pattern>
+        </usage-patterns>
+      </interface>
+      <interface type="scripts">
+        <description>Utility scripts for setup and data management</description>
+        <scripts>
+          <script name="create_admin.py">Creates admin user with bcrypt hashed password</script>
+          <script name="seed_data.py">Seeds 8 gemeentes, 10 services, 80 associations</script>
+          <script name="test_redis.py">Tests Redis connection from Python</script>
+        </scripts>
+      </interface>
+    </interfaces>
+  </artifacts>
+
+  <constraints>
+    <constraint type="security">
+      <description>Never store plain text passwords</description>
+      <reason>Admin passwords must be bcrypt hashed (12 rounds default)</reason>
+    </constraint>
+    <constraint type="security">
+      <description>Default admin password "changeme123" must be changed in production</description>
+      <reason>POC default password is insecure for production use</reason>
+    </constraint>
+    <constraint type="data">
+      <description>All gemeentes support all services (for POC simplicity)</description>
+      <reason>8 gemeentes × 10 services = 80 associations total</reason>
+    </constraint>
+    <constraint type="data">
+      <description>Service keywords must be in Dutch</description>
+      <reason>System is Dutch-language only for POC</reason>
+    </constraint>
+    <constraint type="process">
+      <description>Seed script must be idempotent (skip if data exists)</description>
+      <reason>Prevents duplicate data on repeated runs</reason>
+    </constraint>
+  </constraints>
+
+  <test-ideas>
+    <test id="T1" ac-ref="AC1">
+      <description>Verify Redis server responds to ping</description>
+      <command>redis-cli ping</command>
+      <expected>PONG</expected>
+    </test>
+    <test id="T2" ac-ref="AC2">
+      <description>Verify Python can connect to Redis</description>
+      <command>python backend/test_redis.py</command>
+      <expected>Redis test: Hello Redis!</expected>
+    </test>
+    <test id="T3" ac-ref="AC3">
+      <description>Verify SecurityService hashes passwords</description>
+      <command>python -c "from app.core.security import SecurityService; h = SecurityService.hash_password('test'); print('Hash:', h[:20])"</command>
+      <expected>Hash starts with $2b$ (bcrypt format)</expected>
+    </test>
+    <test id="T4" ac-ref="AC3">
+      <description>Verify SecurityService verifies passwords</description>
+      <command>python -c "from app.core.security import SecurityService; h = SecurityService.hash_password('test'); print(SecurityService.verify_password('test', h))"</command>
+      <expected>True</expected>
+    </test>
+    <test id="T5" ac-ref="AC4">
+      <description>Verify admin user created in database</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT username FROM admin_users;"</command>
+      <expected>admin</expected>
+    </test>
+    <test id="T6" ac-ref="AC4">
+      <description>Verify admin password is hashed (not plain text)</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT password_hash FROM admin_users;"</command>
+      <expected>Starts with $2b$ (bcrypt format)</expected>
+    </test>
+    <test id="T7" ac-ref="AC6">
+      <description>Verify 8 gemeentes created</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT COUNT(*) FROM gemeentes;"</command>
+      <expected>8</expected>
+    </test>
+    <test id="T8" ac-ref="AC6">
+      <description>Verify 10 services created</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT COUNT(*) FROM services;"</command>
+      <expected>10</expected>
+    </test>
+    <test id="T9" ac-ref="AC6">
+      <description>Verify 80 associations created</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT COUNT(*) FROM gemeente_service_associations;"</command>
+      <expected>80</expected>
+    </test>
+    <test id="T10" ac-ref="AC6">
+      <description>Verify sample gemeente names</description>
+      <command>psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT name FROM gemeentes LIMIT 3;"</command>
+      <expected>Amsterdam, Rotterdam, Utrecht (in some order)</expected>
+    </test>
+  </test-ideas>
+
+  <implementation-notes>
+    <note>
+      <title>Redis Usage Patterns</title>
+      <content>Redis serves three purposes: 1) Suggestion caching (5-minute TTL), 2) Admin sessions (24-hour expiry), 3) Rate limiting (API request tracking). All three patterns will be implemented in Epic 1 and Epic 2.</content>
+    </note>
+    <note>
+      <title>bcrypt Security</title>
+      <content>bcrypt auto-generates salts (12 rounds default). Never store plain text passwords. Admin default password "changeme123" is for POC only - must be changed in production.</content>
+    </note>
+    <note>
+      <title>Seed Data Philosophy</title>
+      <content>All gemeentes support all services for POC simplicity (8×10=80 associations). Real production system would have selective associations based on actual gemeente capabilities.</content>
+    </note>
+    <note>
+      <title>Dutch Service Names</title>
+      <content>10 common Dutch government services: Parkeervergunning (parking permit), Paspoort (passport), Rijbewijs (driver's license), Afvalcontainer (waste container), Verhuizing (moving), Bouwvergunning (building permit), Huwelijk (marriage), Kinderopvang toeslag (childcare allowance), Uittreksel GBA (citizen record), Kapvergunning boom (tree felling permit).</content>
+    </note>
+    <note>
+      <title>Dutch Keywords for Search</title>
+      <content>Each service has 4-5 Dutch keywords optimized for search: "parkeren,bewonersvergunning,auto,parkeerplaats,vergunning" for Parkeervergunning. These enable fuzzy matching in Epic 1 suggestion engine.</content>
+    </note>
+    <note>
+      <title>Script Idempotency</title>
+      <content>Both scripts check for existing data before creating. create_admin.py skips if admin exists. seed_data.py skips if any gemeentes exist. Prevents duplicate data on repeated runs.</content>
+    </note>
+  </implementation-notes>
+
+  <dev-agent-record>
+    <context-generation>
+      <agent-model>claude-sonnet-4-5-20250929</agent-model>
+      <generated-date>2025-10-07</generated-date>
+      <user-name>Frank</user-name>
+    </context-generation>
+  </dev-agent-record>
+</story-context>

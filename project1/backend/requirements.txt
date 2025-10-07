@@ -1,0 +1,39 @@
+# ONLSuggest Backend Production Dependencies
+# Python 3.11+ required
+# Generated from solution-architecture.md Technology Stack Summary
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Database
+sqlalchemy==2.0.25
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+alembic==1.13.0
+
+# Caching
+redis==5.0.1
+
+# NLP & Fuzzy Matching
+spacy==3.7.4
+rapidfuzz==3.5.2
+
+# Authentication & Security
+bcrypt==4.1.2
+python-jose[cryptography]==3.3.0
+
+# Rate Limiting
+slowapi==0.1.9
+
+# Logging
+structlog==24.1.0
+
+# Validation & Configuration
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Testing (included for pytest fixture support)
+pytest==7.4.0
+pytest-asyncio==0.21.0
+pytest-cov==4.1.0

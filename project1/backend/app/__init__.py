@@ -1,0 +1,1 @@
+"""ONLSuggest FastAPI application package."""

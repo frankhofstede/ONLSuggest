@@ -33,7 +33,7 @@
 
 **Tech Stack:**
 - Backend: FastAPI 0.109.0, Python 3.11+
-- Database: SQLite 3.40+ with SQLAlchemy 2.0.25 (async)
+- Database: PostgreSQL 15+ with SQLAlchemy 2.0.25 (async)
 - Auth: bcrypt 4.1.2 for password hashing
 - Sessions: Redis 7.2 for token storage
 - Frontend: React 18.2.0, TypeScript 5.3.0, Tailwind CSS 3.4.0

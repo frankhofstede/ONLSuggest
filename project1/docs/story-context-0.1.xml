@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>0.1</story-id>
+    <story-title>Repository Structure &amp; Python Backend Foundation</story-title>
+    <epic-id>0</epic-id>
+    <epic-title>Development Environment Setup</epic-title>
+    <created-date>2025-10-07</created-date>
+    <status>ContextReadyDraft</status>
+  </metadata>
+
+  <user-story>
+    <role>developer</role>
+    <action>set up the project repository structure and Python backend environment</action>
+    <outcome>I have a working foundation to develop ONLSuggest features</outcome>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1">Project directory structure created with backend/ and frontend/ folders per monorepo design</criterion>
+    <criterion id="AC2">Python 3.11+ virtual environment created and activated</criterion>
+    <criterion id="AC3">All backend dependencies installed (FastAPI, SQLAlchemy, asyncpg, spaCy, Redis, etc.)</criterion>
+    <criterion id="AC4">Dutch NLP model (nl_core_news_sm) downloaded and verified</criterion>
+    <criterion id="AC5">Development tools installed (pytest, black, flake8, mypy)</criterion>
+    <criterion id="AC6">.gitignore configured to exclude .env, .venv, __pycache__</criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac-ref="AC1">
+      <title>Create monorepo directory structure</title>
+      <subtasks>
+        <subtask id="1.1">Navigate to project root /Users/koop/PycharmProjects/ONLSuggest/project1</subtask>
+        <subtask id="1.2">Create backend directories: backend/app/{models,schemas,routers,services,middleware,core,utils}</subtask>
+        <subtask id="1.3">Create backend test directories: backend/tests/{unit,integration}</subtask>
+        <subtask id="1.4">Create backend scripts directory: backend/scripts</subtask>
+        <subtask id="1.5">Create frontend directories (placeholder): frontend/src, frontend/tests</subtask>
+        <subtask id="1.6">Verify structure with tree -L 3 -d</subtask>
+      </subtasks>
+    </task>
+    <task id="2" ac-ref="AC2">
+      <title>Set up Python virtual environment</title>
+      <subtasks>
+        <subtask id="2.1">Verify Python 3.11+ installed: python3 --version</subtask>
+        <subtask id="2.2">Create virtual environment: cd backend &amp;&amp; python3 -m venv .venv</subtask>
+        <subtask id="2.3">Activate virtual environment: source .venv/bin/activate</subtask>
+        <subtask id="2.4">Verify activation (.venv prefix in terminal, which python)</subtask>
+      </subtasks>
+    </task>
+    <task id="3" ac-ref="AC3">
+      <title>Install backend production dependencies</title>
+      <subtasks>
+        <subtask id="3.1">Create backend/requirements.txt with 22 packages (FastAPI, uvicorn, SQLAlchemy, asyncpg, psycopg2-binary, alembic, redis, spaCy, rapidfuzz, bcrypt, slowapi, structlog, pydantic, pydantic-settings, python-jose)</subtask>
+        <subtask id="3.2">Upgrade pip: pip install --upgrade pip</subtask>
+        <subtask id="3.3">Install dependencies: pip install -r requirements.txt</subtask>
+        <subtask id="3.4">Verify installations: pip list | grep fastapi, pip list | grep spacy</subtask>
+      </subtasks>
+    </task>
+    <task id="4" ac-ref="AC4">
+      <title>Download and verify Dutch NLP model</title>
+      <subtasks>
+        <subtask id="4.1">Download model: python -m spacy download nl_core_news_sm</subtask>
+        <subtask id="4.2">Verify model loads: python -c "import spacy; nlp = spacy.load('nl_core_news_sm'); print('Dutch model loaded successfully')"</subtask>
+      </subtasks>
+    </task>
+    <task id="5" ac-ref="AC5">
+      <title>Install development dependencies</title>
+      <subtasks>
+        <subtask id="5.1">Create backend/requirements-dev.txt (pytest, pytest-asyncio, pytest-cov, black, flake8, mypy, locust)</subtask>
+        <subtask id="5.2">Install dev dependencies: pip install -r requirements-dev.txt</subtask>
+        <subtask id="5.3">Verify black installed: black --version</subtask>
+      </subtasks>
+    </task>
+    <task id="6" ac-ref="AC6">
+      <title>Configure .gitignore</title>
+      <subtasks>
+        <subtask id="6.1">Add .env to backend/.gitignore</subtask>
+        <subtask id="6.2">Add .venv/ to backend/.gitignore</subtask>
+        <subtask id="6.3">Add __pycache__/ and *.pyc to backend/.gitignore</subtask>
+        <subtask id="6.4">Verify git ignores these files</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <document-references>
+      <document>
+        <path>docs/solution-architecture.md</path>
+        <relevant-sections>
+          <section>Proposed Source Tree - Complete monorepo structure</section>
+          <section>Technology Stack Summary - All 22 dependencies with versions</section>
+          <section>Backend Framework: FastAPI 0.109.0</section>
+          <section>ORM: SQLAlchemy 2.0.25</section>
+          <section>Dutch NLP: spaCy 3.7.2 + nl_core_news_sm</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/week-1-setup-checklist.md</path>
+        <relevant-sections>
+          <section>Day 1: Repository &amp; Backend Foundation - Complete setup instructions with commands</section>
+          <section>Task 1.1: Repository Structure Setup</section>
+          <section>Task 1.2: Python Virtual Environment</section>
+          <section>Task 1.3: Backend Dependencies Installation (requirements.txt)</section>
+          <section>Task 1.4: Create Development Requirements (requirements-dev.txt)</section>
+        </relevant-sections>
+      </document>
+    </document-references>
+
+    <dependencies>
+      <dependency>
+        <name>Python</name>
+        <version>3.11+</version>
+        <reason>Required for FastAPI 0.109.0 and SQLAlchemy 2.0.25 async features</reason>
+      </dependency>
+      <dependency>
+        <name>fastapi</name>
+        <version>0.109.0</version>
+        <reason>Async web framework for REST API</reason>
+      </dependency>
+      <dependency>
+        <name>uvicorn[standard]</name>
+        <version>0.27.0</version>
+        <reason>ASGI server for FastAPI</reason>
+      </dependency>
+      <dependency>
+        <name>sqlalchemy</name>
+        <version>2.0.25</version>
+        <reason>Async ORM for database operations</reason>
+      </dependency>
+      <dependency>
+        <name>asyncpg</name>
+        <version>0.29.0</version>
+        <reason>High-performance async PostgreSQL driver</reason>
+      </dependency>
+      <dependency>
+        <name>psycopg2-binary</name>
+        <version>2.9.9</version>
+        <reason>PostgreSQL driver for Alembic migrations</reason>
+      </dependency>
+      <dependency>
+        <name>alembic</name>
+        <version>1.13.0</version>
+        <reason>Database migration management</reason>
+      </dependency>
+      <dependency>
+        <name>redis</name>
+        <version>5.0.1</version>
+        <reason>Redis client for caching and sessions</reason>
+      </dependency>
+      <dependency>
+        <name>spacy</name>
+        <version>3.7.2</version>
+        <reason>Dutch NLP for lemmatization and fuzzy matching</reason>
+      </dependency>
+      <dependency>
+        <name>rapidfuzz</name>
+        <version>3.5.2</version>
+        <reason>Fast fuzzy string matching</reason>
+      </dependency>
+      <dependency>
+        <name>bcrypt</name>
+        <version>4.1.2</version>
+        <reason>Password hashing for admin authentication</reason>
+      </dependency>
+      <dependency>
+        <name>slowapi</name>
+        <version>0.1.9</version>
+        <reason>Rate limiting middleware</reason>
+      </dependency>
+      <dependency>
+        <name>structlog</name>
+        <version>24.1.0</version>
+        <reason>Structured logging</reason>
+      </dependency>
+      <dependency>
+        <name>pydantic</name>
+        <version>2.5.0</version>
+        <reason>Request/response validation</reason>
+      </dependency>
+      <dependency>
+        <name>pydantic-settings</name>
+        <version>2.1.0</version>
+        <reason>Configuration management</reason>
+      </dependency>
+      <dependency>
+        <name>pytest</name>
+        <version>7.4.0</version>
+        <reason>Testing framework</reason>
+      </dependency>
+      <dependency>
+        <name>pytest-asyncio</name>
+        <version>0.21.0</version>
+        <reason>Async test support</reason>
+      </dependency>
+      <dependency>
+        <name>black</name>
+        <version>23.12.0</version>
+        <reason>Code formatting (PEP 8)</reason>
+      </dependency>
+      <dependency>
+        <name>flake8</name>
+        <version>7.0.0</version>
+        <reason>Linting</reason>
+      </dependency>
+      <dependency>
+        <name>mypy</name>
+        <version>1.8.0</version>
+        <reason>Type checking</reason>
+      </dependency>
+      <dependency>
+        <name>locust</name>
+        <version>2.20.0</version>
+        <reason>Load testing</reason>
+      </dependency>
+      <dependency>
+        <name>nl_core_news_sm</name>
+        <version>spaCy 3.7.2</version>
+        <reason>Dutch language model for NLP processing</reason>
+      </dependency>
+    </dependencies>
+
+    <interfaces>
+      <interface type="filesystem">
+        <description>Monorepo directory structure with backend/ and frontend/ folders</description>
+        <structure>
+onlsuggest/
+├── backend/
+│   ├── app/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── routers/
+│   │   ├── services/
+│   │   ├── middleware/
+│   │   ├── core/
+│   │   └── utils/
+│   ├── alembic/
+│   ├── tests/
+│   │   ├── unit/
+│   │   └── integration/
+│   ├── scripts/
+│   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   └── .gitignore
+├── frontend/
+│   ├── src/
+│   └── tests/
+└── docs/
+        </structure>
+      </interface>
+      <interface type="python-environment">
+        <description>Python 3.11+ virtual environment with all dependencies</description>
+        <activation-command>source backend/.venv/bin/activate</activation-command>
+        <verification-command>which python &amp;&amp; python --version</verification-command>
+      </interface>
+    </interfaces>
+  </artifacts>
+
+  <constraints>
+    <constraint type="technical">
+      <description>Python version must be 3.11 or higher</description>
+      <reason>Required for FastAPI 0.109.0 and SQLAlchemy 2.0.25 async features</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>All packages must use specific versions listed in solution-architecture.md</description>
+      <reason>Ensures consistency and prevents version conflicts</reason>
+    </constraint>
+    <constraint type="process">
+      <description>Virtual environment must be activated before any pip install commands</description>
+      <reason>Prevents installing packages system-wide</reason>
+    </constraint>
+    <constraint type="process">
+      <description>.gitignore must exclude .env, .venv, __pycache__</description>
+      <reason>Prevents committing secrets and build artifacts</reason>
+    </constraint>
+  </constraints>
+
+  <test-ideas>
+    <test id="T1" ac-ref="AC1">
+      <description>Verify all directories exist using tree command</description>
+      <command>tree -L 3 -d</command>
+      <expected>All backend and frontend directories visible</expected>
+    </test>
+    <test id="T2" ac-ref="AC2">
+      <description>Verify virtual environment activation</description>
+      <command>which python</command>
+      <expected>Path points to .venv/bin/python</expected>
+    </test>
+    <test id="T3" ac-ref="AC2">
+      <description>Verify Python version</description>
+      <command>python --version</command>
+      <expected>Python 3.11 or higher</expected>
+    </test>
+    <test id="T4" ac-ref="AC3">
+      <description>Verify FastAPI installed</description>
+      <command>pip list | grep fastapi</command>
+      <expected>fastapi 0.109.0</expected>
+    </test>
+    <test id="T5" ac-ref="AC3">
+      <description>Verify spaCy installed</description>
+      <command>pip list | grep spacy</command>
+      <expected>spacy 3.7.2</expected>
+    </test>
+    <test id="T6" ac-ref="AC4">
+      <description>Verify Dutch NLP model loads</description>
+      <command>python -c "import spacy; nlp = spacy.load('nl_core_news_sm'); print('Dutch model loaded successfully')"</command>
+      <expected>Output: Dutch model loaded successfully</expected>
+    </test>
+    <test id="T7" ac-ref="AC5">
+      <description>Verify black installed</description>
+      <command>black --version</command>
+      <expected>black, 23.12.0</expected>
+    </test>
+    <test id="T8" ac-ref="AC5">
+      <description>Verify pytest installed</description>
+      <command>pytest --version</command>
+      <expected>pytest 7.4.0</expected>
+    </test>
+    <test id="T9" ac-ref="AC6">
+      <description>Verify .gitignore contains required entries</description>
+      <command>cat backend/.gitignore</command>
+      <expected>Contains .env, .venv/, __pycache__/, *.pyc</expected>
+    </test>
+    <test id="T10" ac-ref="AC6">
+      <description>Verify git status ignores .venv and __pycache__</description>
+      <command>git status</command>
+      <expected>.venv and __pycache__ not shown in untracked files</expected>
+    </test>
+  </test-ideas>
+
+  <implementation-notes>
+    <note>
+      <title>Monorepo Structure Philosophy</title>
+      <content>The backend follows FastAPI best practices with clear separation of concerns: routers handle HTTP, services contain business logic, models define database schema. This structure supports both Epic 1 (suggestion engine) and Epic 2 (admin CRUD).</content>
+    </note>
+    <note>
+      <title>Virtual Environment Isolation</title>
+      <content>Using .venv within backend/ directory keeps Python environment isolated. Always activate before running any Python commands or pip installs.</content>
+    </note>
+    <note>
+      <title>Dutch NLP Model Size</title>
+      <content>nl_core_news_sm is the "small" Dutch model (~50MB). Sufficient for POC lemmatization and similarity scoring. Larger models (nl_core_news_md, nl_core_news_lg) available if needed for better accuracy.</content>
+    </note>
+    <note>
+      <title>Development Tools</title>
+      <content>black (formatting), flake8 (linting), mypy (type checking) ensure code quality. pytest with pytest-asyncio supports async test cases for FastAPI endpoints.</content>
+    </note>
+    <note>
+      <title>Greenfield Project</title>
+      <content>No existing code to integrate. This is a fresh start, so no conflicts with existing structure.</content>
+    </note>
+  </implementation-notes>
+
+  <dev-agent-record>
+    <context-generation>
+      <agent-model>claude-sonnet-4-5-20250929</agent-model>
+      <generated-date>2025-10-07</generated-date>
+      <user-name>Frank</user-name>
+    </context-generation>
+  </dev-agent-record>
+</story-context>

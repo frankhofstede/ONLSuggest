@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context version="6.0" epic="1" story="1.1">
+  <metadata>
+    <title>Basic Input Field with Character Minimum Validation</title>
+    <status>ContextReadyDraft</status>
+    <created>2025-10-07</created>
+    <story_path>/Users/koop/PycharmProjects/ONLSuggest/project1/docs/stories/story-1.1.md</story_path>
+  </metadata>
+
+  <user-story>
+    <as_a>citizen</as_a>
+    <i_want>type my query into a simple search box with visual feedback</i_want>
+    <so_that>I can start finding municipal services with clear guidance on input requirements</so_that>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1">Input field accepts Dutch text input (UTF-8) including special characters (ë, ï, ü, é, etc.)</criterion>
+    <criterion id="AC2">Minimum 2 characters required before suggestions trigger</criterion>
+    <criterion id="AC3">Clear visual feedback when minimum character count is not met (red border + helper text)</criterion>
+    <criterion id="AC4">Visual feedback when valid (blue/green border)</criterion>
+    <criterion id="AC5">Input field is prominently displayed on page load (centered, large, accessible)</criterion>
+    <criterion id="AC6">Supports keyboard navigation (Tab to focus, Escape to clear, Arrow Down to first suggestion)</criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="T1" ac="AC1,AC2,AC5">Create SearchBox React component with TypeScript</task>
+    <task id="T2" ac="AC2,AC3,AC4">Implement 2-character minimum validation with visual feedback</task>
+    <task id="T3" ac="AC2">Add debouncing to prevent excessive API calls</task>
+    <task id="T4" ac="AC6">Implement keyboard navigation support</task>
+    <task id="T5" ac="AC5,AC6">Add WCAG 2.1 AA accessibility attributes</task>
+    <task id="T6" ac="ALL">Write unit tests for SearchBox component</task>
+    <task id="T7" ac="ALL">Write E2E test for search input flow</task>
+  </tasks>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>/Users/koop/PycharmProjects/ONLSuggest/project1/docs/tech-spec-epic-1.md</path>
+        <title>Tech Spec: Epic 1 - Query Suggestion Engine</title>
+        <section>Story 1.1: Basic Input Field with Character Minimum Validation</section>
+        <snippet>Complete implementation details with TypeScript code examples for SearchBox component, debouncing, validation logic, accessibility attributes, and testing strategies</snippet>
+      </doc>
+      <doc>
+        <path>/Users/koop/PycharmProjects/ONLSuggest/project1/docs/solution-architecture.md</path>
+        <title>Solution Architecture</title>
+        <section>Frontend Stack + Proposed Source Tree</section>
+        <snippet>React 18.2.0, TypeScript 5.3.0, Tailwind CSS 3.4.0, TanStack Query 5.17.0, Component directory structure: frontend/src/components/public/</snippet>
+      </doc>
+      <doc>
+        <path>/Users/koop/PycharmProjects/ONLSuggest/project1/docs/ux-specification.md</path>
+        <title>UX Specification</title>
+        <section>SearchBox Component</section>
+        <snippet>Visual states (empty, invalid, valid), keyboard navigation patterns, color contrast requirements, focus indicators</snippet>
+      </doc>
+      <doc>
+        <path>/Users/koop/PycharmProjects/ONLSuggest/project1/docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR001: Partial query input (2+ chars)</section>
+        <snippet>Functional requirement mandating 2-character minimum before suggestion trigger</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <!-- No existing code yet - greenfield project -->
+    </code>
+
+    <dependencies>
+      <frontend>
+        <package name="react" version="18.2.0">Core UI framework</package>
+        <package name="typescript" version="5.3.0">Type safety</package>
+        <package name="tailwindcss" version="3.4.0">Styling utility classes</package>
+        <package name="@tanstack/react-query" version="5.17.0">Server state management (future integration)</package>
+        <package name="react-hook-form" version="7.49.0">Optional for complex validation</package>
+      </frontend>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>SearchBoxProps</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface SearchBoxProps { onQueryChange: (query: string) => void; placeholder?: string; minChars?: number; }</signature>
+      <path>frontend/src/components/public/SearchBox.tsx</path>
+      <reason>Component contract for parent integration</reason>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint>Use Tailwind CSS utility classes for styling - no custom CSS files</constraint>
+    <constraint>Component must be in frontend/src/components/public/ per monorepo structure</constraint>
+    <constraint>Debounce delay: 150ms (performance requirement from tech spec)</constraint>
+    <constraint>WCAG 2.1 AA compliance: color contrast 4.5:1 minimum, keyboard navigable, ARIA attributes required</constraint>
+    <constraint>UTF-8 encoding throughout (Dutch special characters: ë, ï, ü, é)</constraint>
+    <constraint>Test coverage target: >80% for component</constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+      Unit Testing: Jest + React Testing Library. E2E Testing: Playwright (as specified in config.yaml desired_mcp_tools). Test files located at frontend/tests/components/ for units, frontend/tests/e2e/ for end-to-end. Minimum 80% coverage target.
+    </standards>
+    <locations>
+      <location>frontend/tests/components/SearchBox.test.tsx</location>
+      <location>frontend/tests/e2e/search-input.spec.ts</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1">Test UTF-8 character input - type "parkë" and verify value stored correctly</idea>
+      <idea ac="AC2">Test 2-character minimum - type "p" (1 char) and verify onQueryChange NOT called</idea>
+      <idea ac="AC2,AC4">Test validation state - type "pa" (2 chars) and verify isValid=true, blue border class applied</idea>
+      <idea ac="AC3">Test invalid visual feedback - type "p" and verify red border + helper text "Typ minimaal 2 tekens" displayed</idea>
+      <idea ac="AC2">Test debounce timing - type "pa" rapidly and verify only ONE onQueryChange call after 150ms</idea>
+      <idea ac="AC6">Test Escape key - press Escape and verify input cleared (query="")</idea>
+      <idea ac="AC6">Test Arrow Down key - press Arrow Down and verify onArrowDown callback fired (if prop provided)</idea>
+      <idea ac="AC5">Test accessibility - verify aria-label, role="combobox", tabIndex={0} present</idea>
+      <idea ac="ALL">E2E - Navigate to home page, verify search box visible and auto-focused</idea>
+      <idea ac="AC3,AC4">E2E - Type "p" → verify red border, type "pa" → verify blue border and suggestions appear (integration)</idea>
+    </ideas>
+  </tests>
+
+  <dev-notes>
+    <note>This is the first story in Epic 1 - no existing code to integrate with yet</note>
+    <note>Debounce utility should be created as reusable function in frontend/src/utils/debounce.ts</note>
+    <note>Component will receive onQueryChange callback from parent (Home page) which will call the suggestion API</note>
+    <note>Visual feedback colors: Red (#EF4444 / red-600), Blue (#2563EB / blue-600) from Tailwind palette</note>
+    <note>Helper text placement: Below input, small text (text-sm), red color when shown</note>
+  </dev-notes>
+</story-context>

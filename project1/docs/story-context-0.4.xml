@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story-id>0.4</story-id>
+    <story-title>Frontend Initialization &amp; Dependencies</story-title>
+    <epic-id>0</epic-id>
+    <epic-title>Development Environment Setup</epic-title>
+    <created-date>2025-10-07</created-date>
+    <status>ContextReadyDraft</status>
+  </metadata>
+
+  <user-story>
+    <role>developer</role>
+    <action>initialize React + TypeScript frontend with all required dependencies</action>
+    <outcome>I have a working frontend foundation ready for UI development</outcome>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC1">Node.js 18+ verified and npm available</criterion>
+    <criterion id="AC2">Vite + React + TypeScript project created</criterion>
+    <criterion id="AC3">All frontend dependencies installed (React Router, TanStack Query, Tailwind CSS, axios, react-hook-form)</criterion>
+    <criterion id="AC4">Tailwind CSS configured with content paths</criterion>
+    <criterion id="AC5">Frontend directory structure created (components, pages, api, hooks, contexts, types, utils)</criterion>
+    <criterion id="AC6">Vite dev server runs successfully and displays default React page</criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" ac-ref="AC1 AC2">
+      <title>Verify Node.js and create Vite project</title>
+      <subtasks>
+        <subtask id="1.1">Verify Node.js 18+: node --version</subtask>
+        <subtask id="1.2">Verify npm: npm --version</subtask>
+        <subtask id="1.3">Navigate to project root</subtask>
+        <subtask id="1.4">Create Vite project: npm create vite@latest frontend -- --template react-ts</subtask>
+        <subtask id="1.5">Navigate to frontend: cd frontend</subtask>
+        <subtask id="1.6">Install base dependencies: npm install</subtask>
+      </subtasks>
+    </task>
+    <task id="2" ac-ref="AC3">
+      <title>Install core frontend dependencies</title>
+      <subtasks>
+        <subtask id="2.1">Install React Router: npm install react-router-dom@6.21.0</subtask>
+        <subtask id="2.2">Install TanStack Query: npm install @tanstack/react-query@5.17.0</subtask>
+        <subtask id="2.3">Install axios: npm install axios@1.6.0</subtask>
+        <subtask id="2.4">Install react-hook-form: npm install react-hook-form@7.49.0</subtask>
+        <subtask id="2.5">Verify package.json contains all 4 dependencies</subtask>
+      </subtasks>
+    </task>
+    <task id="3" ac-ref="AC4">
+      <title>Install and configure Tailwind CSS</title>
+      <subtasks>
+        <subtask id="3.1">Install Tailwind: npm install -D tailwindcss@3.4.0 postcss autoprefixer</subtask>
+        <subtask id="3.2">Initialize Tailwind: npx tailwindcss init -p</subtask>
+        <subtask id="3.3">Update tailwind.config.js content paths to include ./index.html and ./src/**/*.{js,ts,jsx,tsx}</subtask>
+        <subtask id="3.4">Update src/index.css with Tailwind directives (@tailwind base, components, utilities)</subtask>
+        <subtask id="3.5">Verify Tailwind classes work (test in App.tsx)</subtask>
+      </subtasks>
+    </task>
+    <task id="4" ac-ref="AC5">
+      <title>Create frontend directory structure</title>
+      <subtasks>
+        <subtask id="4.1">Create directories: src/components/{public,admin,common}</subtask>
+        <subtask id="4.2">Create directories: src/pages/admin</subtask>
+        <subtask id="4.3">Create directories: src/{api,hooks,contexts,types,utils}</subtask>
+        <subtask id="4.4">Add .gitkeep files to empty directories</subtask>
+        <subtask id="4.5">Verify structure: tree -L 3 src/</subtask>
+      </subtasks>
+    </task>
+    <task id="5" ac-ref="AC5">
+      <title>Create API client configuration</title>
+      <subtasks>
+        <subtask id="5.1">Create src/api/client.ts with axios instance (baseURL: http://localhost:8000)</subtask>
+        <subtask id="5.2">Add request interceptor to inject Authorization header from localStorage</subtask>
+        <subtask id="5.3">Export configured axios client</subtask>
+        <subtask id="5.4">Create src/types/suggestion.ts with Suggestion and SuggestionResponse interfaces</subtask>
+      </subtasks>
+    </task>
+    <task id="6" ac-ref="AC6">
+      <title>Create .env and test dev server</title>
+      <subtasks>
+        <subtask id="6.1">Create frontend/.env with VITE_API_URL=http://localhost:8000</subtask>
+        <subtask id="6.2">Add .env to frontend/.gitignore</subtask>
+        <subtask id="6.3">Add node_modules/ and dist/ to .gitignore</subtask>
+        <subtask id="6.4">Start dev server: npm run dev</subtask>
+        <subtask id="6.5">Visit http://localhost:5173 and verify default Vite + React page loads</subtask>
+        <subtask id="6.6">Stop dev server (Ctrl+C)</subtask>
+      </subtasks>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <document-references>
+      <document>
+        <path>docs/solution-architecture.md</path>
+        <relevant-sections>
+          <section>Frontend Framework: React 18.2.0 - User preference, large ecosystem</section>
+          <section>Frontend Language: TypeScript 5.3.0 - Type safety across stack</section>
+          <section>Build Tool: Vite 5.0.0 - Fast dev server, optimized builds</section>
+          <section>Styling: Tailwind CSS 3.4.0 - UX spec requirement</section>
+          <section>State Management: TanStack Query 5.17.0 + Context API</section>
+          <section>Proposed Source Tree - Complete frontend directory structure</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/week-1-setup-checklist.md</path>
+        <relevant-sections>
+          <section>Day 4: Frontend Setup - Complete frontend initialization instructions</section>
+          <section>Task 4.1: Node.js &amp; Frontend Initialization</section>
+          <section>Task 4.2: Install Frontend Dependencies</section>
+          <section>Task 4.3: Frontend Project Structure</section>
+          <section>Task 4.4: Basic Frontend Configuration</section>
+        </relevant-sections>
+      </document>
+      <document>
+        <path>docs/tech-spec-epic-1.md</path>
+        <relevant-sections>
+          <section>Frontend Implementation - Component patterns and structure</section>
+        </relevant-sections>
+      </document>
+    </document-references>
+
+    <dependencies>
+      <dependency>
+        <name>Node.js</name>
+        <version>18+</version>
+        <reason>Required for Vite 5.0.0 and modern JavaScript features</reason>
+      </dependency>
+      <dependency>
+        <name>react</name>
+        <version>18.2.0</version>
+        <reason>UI framework for component-based development</reason>
+      </dependency>
+      <dependency>
+        <name>typescript</name>
+        <version>5.3.0</version>
+        <reason>Type safety across frontend codebase</reason>
+      </dependency>
+      <dependency>
+        <name>vite</name>
+        <version>5.0.0</version>
+        <reason>Fast dev server with HMR, optimized production builds</reason>
+      </dependency>
+      <dependency>
+        <name>react-router-dom</name>
+        <version>6.21.0</version>
+        <reason>Client-side routing for SPA</reason>
+      </dependency>
+      <dependency>
+        <name>@tanstack/react-query</name>
+        <version>5.17.0</version>
+        <reason>Server state management, caching, background updates</reason>
+      </dependency>
+      <dependency>
+        <name>axios</name>
+        <version>1.6.0</version>
+        <reason>HTTP client for API requests</reason>
+      </dependency>
+      <dependency>
+        <name>react-hook-form</name>
+        <version>7.49.0</version>
+        <reason>Performance-optimized form validation and state</reason>
+      </dependency>
+      <dependency>
+        <name>tailwindcss</name>
+        <version>3.4.0</version>
+        <reason>Utility-first CSS framework (UX spec requirement)</reason>
+      </dependency>
+    </dependencies>
+
+    <interfaces>
+      <interface type="api-client">
+        <description>Axios HTTP client configured for backend API</description>
+        <base-url>http://localhost:8000</base-url>
+        <authentication>Bearer token from localStorage (Authorization header)</authentication>
+      </interface>
+      <interface type="typescript-types">
+        <description>Type definitions for API data structures</description>
+        <types>
+          <type name="Suggestion">id, question, gemeente, service_id, service_name, confidence</type>
+          <type name="SuggestionResponse">suggestions[], query, generated_at, cached</type>
+        </types>
+      </interface>
+      <interface type="dev-server">
+        <description>Vite development server</description>
+        <url>http://localhost:5173</url>
+        <features>Hot Module Replacement (HMR), Fast Refresh, TypeScript support</features>
+      </interface>
+    </interfaces>
+  </artifacts>
+
+  <constraints>
+    <constraint type="technical">
+      <description>Node.js version must be 18 or higher</description>
+      <reason>Required for Vite 5.0.0 and modern JavaScript features</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>All dependencies must use specific versions from solution-architecture.md</description>
+      <reason>Ensures consistency with backend and prevents version conflicts</reason>
+    </constraint>
+    <constraint type="technical">
+      <description>Tailwind content paths must include all source files</description>
+      <reason>./index.html and ./src/**/*.{js,ts,jsx,tsx} ensures all classes are detected</reason>
+    </constraint>
+    <constraint type="architecture">
+      <description>Directory structure must match proposed source tree</description>
+      <reason>components/{public,admin,common}, pages, api, hooks, contexts, types, utils</reason>
+    </constraint>
+    <constraint type="security">
+      <description>.env file must be excluded from git</description>
+      <reason>Contains API URLs that may differ between environments</reason>
+    </constraint>
+  </constraints>
+
+  <test-ideas>
+    <test id="T1" ac-ref="AC1">
+      <description>Verify Node.js version</description>
+      <command>node --version</command>
+      <expected>v18.x.x or higher</expected>
+    </test>
+    <test id="T2" ac-ref="AC1">
+      <description>Verify npm available</description>
+      <command>npm --version</command>
+      <expected>9.x.x or higher</expected>
+    </test>
+    <test id="T3" ac-ref="AC2">
+      <description>Verify Vite project created</description>
+      <command>ls frontend/package.json</command>
+      <expected>File exists</expected>
+    </test>
+    <test id="T4" ac-ref="AC3">
+      <description>Verify React Router installed</description>
+      <command>grep react-router-dom frontend/package.json</command>
+      <expected>"react-router-dom": "6.21.0"</expected>
+    </test>
+    <test id="T5" ac-ref="AC3">
+      <description>Verify TanStack Query installed</description>
+      <command>grep @tanstack/react-query frontend/package.json</command>
+      <expected>"@tanstack/react-query": "5.17.0"</expected>
+    </test>
+    <test id="T6" ac-ref="AC4">
+      <description>Verify Tailwind config exists</description>
+      <command>ls frontend/tailwind.config.js</command>
+      <expected>File exists</expected>
+    </test>
+    <test id="T7" ac-ref="AC4">
+      <description>Verify Tailwind content paths configured</description>
+      <command>grep -A2 "content:" frontend/tailwind.config.js</command>
+      <expected>Contains "./index.html" and "./src/**/*.{js,ts,jsx,tsx}"</expected>
+    </test>
+    <test id="T8" ac-ref="AC5">
+      <description>Verify frontend directory structure</description>
+      <command>tree -L 3 frontend/src</command>
+      <expected>Shows components, pages, api, hooks, contexts, types, utils directories</expected>
+    </test>
+    <test id="T9" ac-ref="AC5">
+      <description>Verify API client created</description>
+      <command>ls frontend/src/api/client.ts</command>
+      <expected>File exists</expected>
+    </test>
+    <test id="T10" ac-ref="AC6">
+      <description>Verify dev server runs</description>
+      <command>cd frontend &amp;&amp; npm run dev</command>
+      <expected>Server starts on http://localhost:5173</expected>
+    </test>
+  </test-ideas>
+
+  <implementation-notes>
+    <note>
+      <title>Frontend Stack Rationale</title>
+      <content>React 18.2.0 chosen for user expertise and ecosystem. TypeScript 5.3.0 provides type safety end-to-end. Vite 5.0.0 offers fast dev server with instant HMR. Tailwind CSS 3.4.0 required by UX spec for rapid experimentation.</content>
+    </note>
+    <note>
+      <title>State Management Strategy</title>
+      <content>TanStack Query manages server state (API data, caching, background updates). React Context API handles UI state (theme, modals, form visibility). No Redux needed for POC complexity.</content>
+    </note>
+    <note>
+      <title>Directory Structure Philosophy</title>
+      <content>components/public/ for citizen-facing (SearchBox, SuggestionList), components/admin/ for admin dashboard, components/common/ for shared. Clear separation enables parallel Epic 1 and Epic 2 development.</content>
+    </note>
+    <note>
+      <title>API Client Pattern</title>
+      <content>Axios instance with baseURL http://localhost:8000. Request interceptor automatically injects Authorization header from localStorage for admin routes. Response interceptor can handle global error handling.</content>
+    </note>
+    <note>
+      <title>TypeScript Types</title>
+      <content>src/types/ contains interfaces for API data structures (Suggestion, Service, Gemeente, etc.). These types mirror backend Pydantic schemas for end-to-end type safety.</content>
+    </note>
+    <note>
+      <title>Vite HMR Benefits</title>
+      <content>Instant Hot Module Replacement preserves component state during development. Fast builds (~1s for small changes). Native ESM support for modern JavaScript features.</content>
+    </note>
+  </implementation-notes>
+
+  <dev-agent-record>
+    <context-generation>
+      <agent-model>claude-sonnet-4-5-20250929</agent-model>
+      <generated-date>2025-10-07</generated-date>
+      <user-name>Frank</user-name>
+    </context-generation>
+  </dev-agent-record>
+</story-context>

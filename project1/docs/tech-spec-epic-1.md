@@ -1,3 +1,4 @@
+
 # Tech Spec: Epic 1 - Query Suggestion Engine
 
 **Author:** Winston (Architect)
@@ -33,7 +34,7 @@
 
 **Tech Stack:**
 - Backend: FastAPI 0.109.0, Python 3.11+
-- Database: SQLite 3.40+ with FTS5
+- Database: PostgreSQL 15+ with native full-text search
 - ORM: SQLAlchemy 2.0.25 (async)
 - NLP: spaCy 3.7.2 + nl_core_news_sm (Dutch model)
 - Caching: functools.lru_cache + Redis 7.2
@@ -234,7 +235,7 @@ except DatabaseError as e:
 
 **Concurrent Request Handling:**
 - FastAPI uses async workers (Uvicorn)
-- SQLite write lock handled by connection pool
+- PostgreSQL MVCC handles concurrent writes without locks
 - Redis provides atomic operations
 - Target: 50 concurrent requests (POC)
 
@@ -1238,15 +1239,24 @@ CREATE TABLE gemeente_service_associations (
     UNIQUE(gemeente_id, service_id)
 );
 
--- FTS5 for Dutch full-text search
-CREATE VIRTUAL TABLE services_fts USING fts5(
-    service_id UNINDEXED,
-    name,
-    description,
-    keywords,
-    content='services',
-    content_rowid='id'
-);
+-- PostgreSQL full-text search for Dutch
+ALTER TABLE services ADD COLUMN search_vector tsvector;
+CREATE INDEX idx_services_search ON services USING GIN(search_vector);
+
+-- Trigger to update search_vector automatically
+CREATE FUNCTION services_search_vector_trigger() RETURNS trigger AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('dutch', COALESCE(NEW.name, '')), 'A') ||
+    setweight(to_tsvector('dutch', COALESCE(NEW.description, '')), 'B') ||
+    setweight(to_tsvector('dutch', COALESCE(NEW.keywords, '')), 'C');
+  RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER services_search_update
+  BEFORE INSERT OR UPDATE ON services
+  FOR EACH ROW EXECUTE FUNCTION services_search_vector_trigger();
 ```
 
 **Sample Data for Testing:**
@@ -1398,7 +1408,7 @@ Response (200 OK):
 - `tests/test_suggestions_api.py`
   - Test POST /api/suggestions endpoint
   - Test cache integration (Redis)
-  - Test database integration (SQLite)
+  - Test database integration (PostgreSQL)
 
 **Performance Tests:**
 
@@ -1423,7 +1433,7 @@ Response (200 OK):
 
 ```bash
 # .env
-DATABASE_URL=sqlite:///./app.db
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/onlsuggest
 REDIS_URL=redis://localhost:6379
 SPACY_MODEL=nl_core_news_sm
 CACHE_TTL=300
@@ -1437,7 +1447,7 @@ Backend:
 pip install fastapi==0.109.0
 pip install uvicorn==0.27.0
 pip install sqlalchemy==2.0.25
-pip install aiosqlite==0.19.0
+pip install asyncpg==0.29.0
 pip install alembic==1.13.0
 pip install redis==5.0.1
 pip install spacy==3.7.2
@@ -1445,6 +1455,7 @@ pip install rapidfuzz==3.5.2
 pip install bcrypt==4.1.2
 pip install slowapi==0.1.9
 pip install structlog==24.1.0
+pip install psycopg2-binary==2.9.9  # For Alembic migrations
 
 # Download Dutch model
 python -m spacy download nl_core_news_sm

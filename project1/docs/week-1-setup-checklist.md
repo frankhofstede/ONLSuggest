@@ -77,7 +77,8 @@
 
   # Database
   sqlalchemy==2.0.25
-  aiosqlite==0.19.0
+  asyncpg==0.29.0
+  psycopg2-binary==2.9.9
   alembic==1.13.0
 
   # Redis
@@ -164,8 +165,60 @@
 
 ## Day 2: Database & Configuration
 
-### ✅ Task 2.1: SQLite Database Setup
-**Estimated Time:** 30 minutes
+### ✅ Task 2.1: PostgreSQL Database Setup
+**Estimated Time:** 45 minutes
+
+**Option A: Docker (Recommended)**
+
+- [ ] Create `docker-compose.yml` in project root
+  ```yaml
+  version: '3.8'
+  services:
+    postgres:
+      image: postgres:15-alpine
+      environment:
+        POSTGRES_USER: onlsuggest
+        POSTGRES_PASSWORD: devpassword
+        POSTGRES_DB: onlsuggest
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+    redis:
+      image: redis:7-alpine
+      ports:
+        - "6379:6379"
+
+  volumes:
+    postgres_data:
+  ```
+
+- [ ] Start services
+  ```bash
+  docker-compose up -d
+  ```
+
+- [ ] Verify PostgreSQL running
+  ```bash
+  docker-compose ps
+  psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "SELECT version();"
+  ```
+
+**Option B: Homebrew (macOS)**
+
+- [ ] Install PostgreSQL
+  ```bash
+  brew install postgresql@15
+  brew services start postgresql@15
+  ```
+
+- [ ] Create database
+  ```bash
+  createdb onlsuggest
+  ```
+
+**Configuration:**
 
 - [ ] Create `backend/app/core/config.py`
   ```python
@@ -173,7 +226,7 @@
 
   class Settings(BaseSettings):
       # Database
-      database_url: str = "sqlite+aiosqlite:///./app.db"
+      database_url: str = "postgresql+asyncpg://onlsuggest:devpassword@localhost:5432/onlsuggest"
 
       # Redis
       redis_url: str = "redis://localhost:6379"
@@ -197,7 +250,7 @@
 
 - [ ] Create `backend/.env`
   ```bash
-  DATABASE_URL=sqlite+aiosqlite:///./app.db
+  DATABASE_URL=postgresql+asyncpg://onlsuggest:devpassword@localhost:5432/onlsuggest
   REDIS_URL=redis://localhost:6379
   SECRET_KEY=dev-secret-key-please-change
   ADMIN_USERNAME=admin
@@ -208,13 +261,12 @@
 - [ ] Add `.env` to `.gitignore`
   ```bash
   echo ".env" >> backend/.gitignore
-  echo "app.db" >> backend/.gitignore
   echo ".venv/" >> backend/.gitignore
   echo "__pycache__/" >> backend/.gitignore
   echo "*.pyc" >> backend/.gitignore
   ```
 
-**Acceptance:** Config loads without error, `.env` excluded from git
+**Acceptance:** PostgreSQL accessible, config loads without error, `.env` excluded from git
 
 ---
 
@@ -382,7 +434,7 @@
   config = context.config
 
   # Set sqlalchemy.url from settings
-  config.set_main_option("sqlalchemy.url", settings.database_url.replace('+aiosqlite', ''))
+  config.set_main_option("sqlalchemy.url", settings.database_url.replace('+asyncpg', '').replace('postgresql', 'postgresql+psycopg2'))
 
   if config.config_file_name is not None:
       fileConfig(config.config_file_name)
@@ -408,7 +460,7 @@
 
   async def run_migrations_online() -> None:
       configuration = config.get_section(config.config_ini_section)
-      configuration["sqlalchemy.url"] = settings.database_url.replace('+aiosqlite', '')
+      configuration["sqlalchemy.url"] = settings.database_url.replace('+asyncpg', '').replace('postgresql', 'postgresql+psycopg2')
 
       connectable = AsyncEngine(
           engine_from_config(
@@ -444,11 +496,11 @@
 
 - [ ] Verify database created
   ```bash
-  ls -lh app.db  # Should exist with size > 0
-  sqlite3 app.db ".tables"  # Should show: admin_users, gemeentes, services, gemeente_service_associations
+  psql postgresql://onlsuggest:devpassword@localhost:5432/onlsuggest -c "\dt"
+  # Should show: admin_users, gemeentes, services, gemeente_service_associations, alembic_version
   ```
 
-**Acceptance:** Database file exists, all 4 tables created
+**Acceptance:** PostgreSQL database contains all 5 tables
 
 ---
 

@@ -1,0 +1,61 @@
+# Environment variables (IMPORTANT: Contains API keys!)
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/.venv/
+backend/venv/
+backend/env/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Node (Frontend)
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+
+# Alembic
+alembic.ini
+
+# Docker
+.dockerignore
+
+# Redis dumps
+dump.rdb
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
