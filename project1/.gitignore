@@ -53,3 +53,4 @@ dump.rdb
 *.tmp
 *.bak
 *.swp
+.vercel
