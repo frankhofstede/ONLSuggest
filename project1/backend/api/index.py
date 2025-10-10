@@ -3,6 +3,16 @@ import json
 import time
 from urllib.parse import urlparse, parse_qs
 
+# Import our custom modules
+try:
+    from database import db
+    from template_engine import template_engine
+    from dutch_matcher import dutch_matcher
+    DB_AVAILABLE = True
+except ImportError as e:
+    DB_AVAILABLE = False
+    DB_ERROR = str(e)
+
 class handler(BaseHTTPRequestHandler):
     def _set_cors_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -26,6 +36,44 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+    def _generate_suggestions_from_database(self, query: str, max_results: int = 5):
+        """
+        Generate suggestions using real database, template engine, and Dutch matcher
+        Stories 1.3 + 1.4: Template Engine + Dutch Language Processing
+        """
+        try:
+            # Fetch all data from database
+            all_gemeentes = db.get_all_gemeentes()
+            all_services = db.get_all_services()
+            all_associations = db.get_all_associations()
+
+            # Match query against gemeentes and services
+            gemeente_matches = dutch_matcher.match_gemeentes(query, all_gemeentes)
+            service_matches = dutch_matcher.match_services(query, all_services, min_confidence=0.5)
+
+            # Combine matches based on associations
+            combined_matches = dutch_matcher.combine_matches(
+                query=query,
+                gemeente_matches=gemeente_matches,
+                service_matches=service_matches,
+                associations=all_associations,
+                max_results=max_results * 2  # Get more candidates
+            )
+
+            # Generate question suggestions using template engine
+            suggestions = template_engine.generate_suggestions(
+                query=query,
+                matched_services=combined_matches,
+                max_results=max_results
+            )
+
+            return suggestions
+
+        except Exception as e:
+            # Return empty list on error, will be handled by caller
+            print(f"Error generating suggestions: {e}")
+            return []
+
     def do_POST(self):
         if self.path == '/api/v1/suggestions':
             start_time = time.time()
@@ -35,11 +83,54 @@ class handler(BaseHTTPRequestHandler):
             body = self.rfile.read(content_length)
             request_data = json.loads(body.decode('utf-8'))
 
-            query = request_data.get('query', '').lower()
+            query = request_data.get('query', '').strip()
             max_results = request_data.get('max_results', 5)
 
-            # Mock data - matching frontend Suggestion interface
-            MOCK_SUGGESTIONS = {
+            # Validate input (Story 1.2)
+            if not query or len(query) < 2:
+                self.send_response(400)
+                self._set_cors_headers()
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                error_response = {
+                    "error": "Query must be at least 2 characters",
+                    "query": query
+                }
+                self.wfile.write(json.dumps(error_response).encode())
+                return
+
+            # Try to use database-powered suggestions
+            if DB_AVAILABLE:
+                suggestions = self._generate_suggestions_from_database(query, max_results)
+            else:
+                # Fallback to mock data if database unavailable
+                suggestions = self._get_mock_suggestions(query, max_results)
+
+            response_time_ms = (time.time() - start_time) * 1000
+
+            response = {
+                "query": request_data.get('query'),
+                "suggestions": suggestions,
+                "response_time_ms": response_time_ms,
+                "using_database": DB_AVAILABLE
+            }
+
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode())
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def _get_mock_suggestions(self, query: str, max_results: int):
+        """Fallback mock data when database is unavailable"""
+        query_lower = query.lower()
+
+        # Mock data - matching frontend Suggestion interface
+        MOCK_SUGGESTIONS = {
                 "parkeer": [
                     {
                         "suggestion": "Hoe kan ik een parkeervergunning aanvragen?",
@@ -182,52 +273,36 @@ class handler(BaseHTTPRequestHandler):
                 ]
             }
 
-            suggestions = []
-            for keyword, mock_suggestions in MOCK_SUGGESTIONS.items():
-                if keyword in query:
-                    suggestions = mock_suggestions[:max_results]
-                    break
+        suggestions = []
+        for keyword, mock_suggestions in MOCK_SUGGESTIONS.items():
+            if keyword in query_lower:
+                suggestions = mock_suggestions[:max_results]
+                break
 
-            if not suggestions:
-                original_query = request_data.get('query')
-                suggestions = [
-                    {
-                        "suggestion": f"Wat kan ik doen met '{original_query}'?",
-                        "confidence": 0.50,
-                        "service": {
-                            "id": 999,
-                            "name": "Algemene informatie",
-                            "description": "Algemene vraag",
-                            "category": "Algemeen"
-                        },
-                        "gemeente": None
+        if not suggestions:
+            suggestions = [
+                {
+                    "suggestion": f"Wat kan ik doen met '{query}'?",
+                    "confidence": 0.50,
+                    "service": {
+                        "id": 999,
+                        "name": "Algemene informatie",
+                        "description": "Algemene vraag",
+                        "category": "Algemeen"
                     },
-                    {
-                        "suggestion": f"Hoe vraag ik informatie aan over '{original_query}'?",
-                        "confidence": 0.45,
-                        "service": {
-                            "id": 1000,
-                            "name": "Informatie aanvragen",
-                            "description": "Informatie aanvragen",
-                            "category": "Algemeen"
-                        },
-                        "gemeente": None
-                    }
-                ]
+                    "gemeente": None
+                },
+                {
+                    "suggestion": f"Hoe vraag ik informatie aan over '{query}'?",
+                    "confidence": 0.45,
+                    "service": {
+                        "id": 1000,
+                        "name": "Informatie aanvragen",
+                        "description": "Informatie aanvragen",
+                        "category": "Algemeen"
+                    },
+                    "gemeente": None
+                }
+            ]
 
-            response_time_ms = (time.time() - start_time) * 1000
-
-            response = {
-                "query": request_data.get('query'),
-                "suggestions": suggestions[:max_results],
-                "response_time_ms": response_time_ms
-            }
-
-            self.send_response(200)
-            self._set_cors_headers()
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(response).encode())
-        else:
-            self.send_response(404)
-            self.end_headers()
+        return suggestions[:max_results]

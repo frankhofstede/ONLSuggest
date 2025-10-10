@@ -1,11 +1,15 @@
-/* Story 2.6: Responsive Design & Styling for SearchBox */
+/* Story 1.1: SearchBox with Character Minimum Validation & Visual Feedback */
+
+.search-box-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
 
 .search-box {
   display: flex;
   gap: 0.75rem;
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
 }
 
 .search-box__input-wrapper {
@@ -32,6 +36,32 @@
 .search-box__input:disabled {
   background: #f9fafb;
   cursor: not-allowed;
+}
+
+/* Story 1.1: Validation States */
+.search-box__input--valid {
+  border-color: #10b981;
+}
+
+.search-box__input--valid:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-box__input--invalid {
+  border-color: #ef4444;
+}
+
+.search-box__input--invalid:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.search-box__validation {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #ef4444;
+  padding-left: 0.25rem;
 }
 
 .search-box__clear {
