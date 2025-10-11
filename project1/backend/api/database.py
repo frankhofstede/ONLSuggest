@@ -1,6 +1,7 @@
 """
 Database module for ONLSuggest admin interface
 Uses Neon Postgres via psycopg2
+Version: 2025-10-12-v3
 """
 import os
 import psycopg2
