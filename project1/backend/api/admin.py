@@ -18,8 +18,16 @@ try:
     # Force reload the module to ensure we get the latest version
     importlib.reload(database_module)
     from database import db
+
+    # Debug: Check if methods exist
+    import sys
+    print(f"[DEBUG] Database module version: {database_module.__doc__}", file=sys.stderr)
+    print(f"[DEBUG] PostgresDatabase methods: {dir(database_module.PostgresDatabase)}", file=sys.stderr)
+    print(f"[DEBUG] db instance has get_setting: {hasattr(db, 'get_setting')}", file=sys.stderr)
 except Exception as e:
     db_error = str(e)
+    import sys
+    print(f"[DEBUG ERROR] Failed to import database: {e}", file=sys.stderr)
 
 # Admin credentials (in production, use environment variables)
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
