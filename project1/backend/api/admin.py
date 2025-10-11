@@ -9,7 +9,7 @@ import os
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
-# Import database module with forced reload to bypass Vercel caching
+# Import database module - create fresh instance to avoid caching issues
 db = None
 db_error = None
 try:
@@ -17,17 +17,12 @@ try:
     import database as database_module
     # Force reload the module to ensure we get the latest version
     importlib.reload(database_module)
-    from database import db
 
-    # Debug: Check if methods exist
-    import sys
-    print(f"[DEBUG] Database module version: {database_module.__doc__}", file=sys.stderr)
-    print(f"[DEBUG] PostgresDatabase methods: {dir(database_module.PostgresDatabase)}", file=sys.stderr)
-    print(f"[DEBUG] db instance has get_setting: {hasattr(db, 'get_setting')}", file=sys.stderr)
+    # Create a FRESH instance instead of using the module-level one
+    # This bypasses any cached instances
+    db = database_module.PostgresDatabase()
 except Exception as e:
     db_error = str(e)
-    import sys
-    print(f"[DEBUG ERROR] Failed to import database: {e}", file=sys.stderr)
 
 # Admin credentials (in production, use environment variables)
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
