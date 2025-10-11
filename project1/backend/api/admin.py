@@ -13,11 +13,34 @@ from datetime import datetime
 db = None
 db_error = None
 try:
-    # Force fresh import of database module
-    import importlib
-    import database as db_module
-    importlib.reload(db_module)
-    from database import db
+    from database import db, get_connection
+    import psycopg2.extras
+
+    # Workaround: Add get_setting and update_setting directly to db object
+    # if they don't exist (Vercel caching issue)
+    if not hasattr(db, 'get_setting'):
+        def get_setting_method(self, key: str):
+            """Get a setting value by key"""
+            with get_connection() as conn:
+                cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                cur.execute("SELECT value FROM app_settings WHERE key = %s", (key,))
+                row = cur.fetchone()
+                return row['value'] if row else None
+
+        def update_setting_method(self, key: str, value: str):
+            """Update a setting value by key"""
+            with get_connection() as conn:
+                cur = conn.cursor()
+                cur.execute(
+                    "UPDATE app_settings SET value = %s, updated_at = CURRENT_TIMESTAMP WHERE key = %s",
+                    (value, key)
+                )
+                return cur.rowcount > 0
+
+        # Dynamically add methods to db instance
+        import types
+        db.get_setting = types.MethodType(get_setting_method, db)
+        db.update_setting = types.MethodType(update_setting_method, db)
 except Exception as e:
     db_error = str(e)
 
