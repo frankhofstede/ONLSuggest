@@ -147,6 +147,10 @@ class handler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json_response(500, {"error": str(e)})
 
+        # TEST ENDPOINT (to verify deployment)
+        elif path == '/api/admin/test-settings':
+            self._send_json_response(200, {"message": "Settings endpoint exists!", "version": "v2"})
+
         # SETTINGS (Epic 3 Story 3.1)
         elif path == '/api/admin/settings':
             try:
