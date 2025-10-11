@@ -147,6 +147,18 @@ class handler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._send_json_response(500, {"error": str(e)})
 
+        # SETTINGS (Epic 3 Story 3.1)
+        elif path == '/api/admin/settings':
+            try:
+                engine = db.get_setting('suggestion_engine')
+                if engine is None:
+                    # Default if setting doesn't exist
+                    self._send_json_response(200, {"suggestion_engine": "template"})
+                else:
+                    self._send_json_response(200, {"suggestion_engine": engine})
+            except Exception as e:
+                self._send_json_response(500, {"error": str(e)})
+
         else:
             self._send_json_response(404, {"error": "Not found"})
 
@@ -247,6 +259,32 @@ class handler(BaseHTTPRequestHandler):
                 self._send_json_response(200, service)
             else:
                 self._send_json_response(404, {"error": "Service not found"})
+
+        # UPDATE SETTINGS (Epic 3 Story 3.1)
+        elif path == '/api/admin/settings':
+            if 'suggestion_engine' not in data:
+                self._send_json_response(400, {"error": "Missing suggestion_engine field"})
+                return
+
+            engine = data['suggestion_engine']
+
+            # Validate value
+            if engine not in ['template', 'koop']:
+                self._send_json_response(400, {"error": "Invalid suggestion_engine value. Must be 'template' or 'koop'"})
+                return
+
+            # Update setting
+            try:
+                success = db.update_setting('suggestion_engine', engine)
+                if success:
+                    self._send_json_response(200, {
+                        "success": True,
+                        "suggestion_engine": engine
+                    })
+                else:
+                    self._send_json_response(500, {"error": "Failed to update setting"})
+            except Exception as e:
+                self._send_json_response(500, {"error": str(e)})
 
         else:
             self._send_json_response(404, {"error": "Not found"})

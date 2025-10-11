@@ -85,6 +85,10 @@ export function AdminDashboard() {
                   <h3>Koppelingen</h3>
                   <p>Beheer gemeente-service koppelingen</p>
                 </Link>
+                <Link to="/admin/settings" className="nav-card">
+                  <h3>Instellingen</h3>
+                  <p>Configureer suggestie engine en andere opties</p>
+                </Link>
               </div>
             </section>
           </>

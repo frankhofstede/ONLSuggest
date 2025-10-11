@@ -230,5 +230,27 @@ class PostgresDatabase:
                 "total_associations": total_associations
             }
 
+    # APP SETTINGS (Epic 3 Story 3.1)
+    def get_setting(self, key: str) -> Optional[str]:
+        """Get a setting value by key"""
+        with get_connection() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute(
+                "SELECT value FROM app_settings WHERE key = %s",
+                (key,)
+            )
+            row = cur.fetchone()
+            return row['value'] if row else None
+
+    def update_setting(self, key: str, value: str) -> bool:
+        """Update a setting value by key"""
+        with get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "UPDATE app_settings SET value = %s, updated_at = CURRENT_TIMESTAMP WHERE key = %s",
+                (value, key)
+            )
+            return cur.rowcount > 0
+
 # Global database instance
 db = PostgresDatabase()
