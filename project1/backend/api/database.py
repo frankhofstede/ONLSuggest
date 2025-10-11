@@ -230,7 +230,7 @@ class PostgresDatabase:
                 "total_associations": total_associations
             }
 
-    # APP SETTINGS (Epic 3 Story 3.1)
+    # APP SETTINGS (Epic 3 Story 3.1) - Force deploy
     def get_setting(self, key: str) -> Optional[str]:
         """Get a setting value by key"""
         with get_connection() as conn:
