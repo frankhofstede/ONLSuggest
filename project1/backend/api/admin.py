@@ -88,6 +88,7 @@ class handler(BaseHTTPRequestHandler):
         # DASHBOARD STATS
         if path == '/api/admin/stats':
             stats = db.get_stats()
+            stats['_deployment_version'] = 'v3-with-settings'
             self._send_json_response(200, stats)
 
         # GEMEENTES
