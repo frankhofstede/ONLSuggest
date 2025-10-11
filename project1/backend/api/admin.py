@@ -9,18 +9,11 @@ import os
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
-# Import database module - create fresh instance to avoid caching issues
+# Import database module
 db = None
 db_error = None
 try:
-    import importlib
-    import database as database_module
-    # Force reload the module to ensure we get the latest version
-    importlib.reload(database_module)
-
-    # Create a FRESH instance instead of using the module-level one
-    # This bypasses any cached instances
-    db = database_module.PostgresDatabase()
+    from database import db
 except Exception as e:
     db_error = str(e)
 
