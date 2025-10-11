@@ -9,10 +9,14 @@ import os
 from urllib.parse import urlparse, parse_qs
 from datetime import datetime
 
-# Import database module
+# Import database module with forced reload to bypass Vercel caching
 db = None
 db_error = None
 try:
+    import importlib
+    import database as database_module
+    # Force reload the module to ensure we get the latest version
+    importlib.reload(database_module)
     from database import db
 except Exception as e:
     db_error = str(e)
