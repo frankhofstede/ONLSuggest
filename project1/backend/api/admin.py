@@ -13,6 +13,10 @@ from datetime import datetime
 db = None
 db_error = None
 try:
+    # Force fresh import of database module
+    import importlib
+    import database as db_module
+    importlib.reload(db_module)
     from database import db
 except Exception as e:
     db_error = str(e)
