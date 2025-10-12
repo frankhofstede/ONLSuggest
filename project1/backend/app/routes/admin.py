@@ -10,8 +10,8 @@ import secrets
 import json
 from datetime import datetime
 
-from api.core.config import settings
-from api.models.database import db
+from app.core.config import settings
+from app.models.database import db
 
 router = APIRouter()
 security = HTTPBasic()

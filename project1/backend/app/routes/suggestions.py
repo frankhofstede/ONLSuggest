@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import time
 
-from api.core.config import settings
-from api.models.database import db
-from api.services.template_engine import template_engine
-from api.services.dutch_matcher import DutchMatcher
-from api.services.koop_client import KoopAPIClient
+from app.core.config import settings
+from app.models.database import db
+from app.services.template_engine import template_engine
+from app.services.dutch_matcher import DutchMatcher
+from app.services.koop_client import KoopAPIClient
 
 router = APIRouter()
 

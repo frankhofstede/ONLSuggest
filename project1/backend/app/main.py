@@ -5,7 +5,7 @@ BMAD-compliant architecture with proper separation of concerns
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import suggestions, admin, health
+from app.routes import suggestions, admin, health
 
 # Create FastAPI application
 app = FastAPI(

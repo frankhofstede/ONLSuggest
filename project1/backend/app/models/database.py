@@ -8,7 +8,7 @@ from psycopg2.extras import RealDictCursor
 from typing import List, Dict, Any, Optional
 from contextlib import contextmanager
 
-from api.core.config import settings
+from app.core.config import settings
 
 
 @contextmanager

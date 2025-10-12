@@ -4,8 +4,8 @@ Health check routes
 from fastapi import APIRouter
 import sys
 
-from api.core.config import settings
-from api.models.database import db
+from app.core.config import settings
+from app.models.database import db
 
 router = APIRouter()
 
