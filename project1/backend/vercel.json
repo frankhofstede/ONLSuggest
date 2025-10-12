@@ -1,12 +1,21 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/admin/(.*)",
-      "destination": "/api/admin"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api/index"
+      "src": "app/main.py",
+      "use": "@vercel/python"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app/main.py"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "KOOP_API_URL": "https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/api/suggest",
+    "ADMIN_USERNAME": "@admin-username",
+    "ADMIN_PASSWORD": "@admin-password"
+  }
 }

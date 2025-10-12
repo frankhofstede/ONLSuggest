@@ -1,4 +1,12 @@
-# Database migration
-alembic==1.13.1
+# FastAPI and ASGI server
+fastapi==0.109.2
+uvicorn==0.27.1
+
+# Database
 psycopg2-binary==2.9.9
-sqlalchemy==2.0.25
+
+# Validation
+pydantic==2.6.1
+
+# HTTP requests
+requests==2.31.0

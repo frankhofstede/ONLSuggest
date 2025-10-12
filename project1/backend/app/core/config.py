@@ -1,58 +1,39 @@
 """
-Application configuration using Pydantic Settings.
-Loads configuration from environment variables and .env file.
+Application configuration
+BMAD-compliant settings management
 """
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 from typing import Optional
 
 
-class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
-
-    # Application
-    app_name: str = "ONLSuggest"
-    debug: bool = False
-    environment: str = "development"
+class Settings:
+    """Application settings from environment variables"""
 
     # Database
-    database_url: str = "postgresql+asyncpg://onlsuggest:devpassword@localhost:5433/onlsuggest"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
-    def __init__(self, **data):
-        """Initialize settings and convert DATABASE_URL to async format."""
-        super().__init__(**data)
-        # Convert postgresql:// to postgresql+asyncpg:// for async support
-        if self.database_url.startswith("postgresql://"):
-            object.__setattr__(
-                self,
-                "database_url",
-                self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-            )
-
-    # Redis
-    redis_url: str = "redis://localhost:6379/0"
-
-    # Security
-    secret_key: str = "dev-secret-key-change-in-production"
-    admin_username: str = "admin"
-    admin_password: str = "admin123"
-
-    # API Rate Limiting
-    rate_limit_per_minute: int = 100
-
-    # CORS
-    cors_origins: list[str] = ["*"]  # Allow all origins for demo deployment
-
-    # Pagination
-    default_page_size: int = 20
-    max_page_size: int = 100
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore"
+    # KOOP API
+    KOOP_API_URL: str = os.getenv(
+        "KOOP_API_URL",
+        "https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/api/suggest"
     )
 
+    # Admin credentials
+    ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123")
 
-# Create global settings instance
+    # API settings
+    API_V1_PREFIX: str = "/api"
+    PROJECT_NAME: str = "ONLSuggest"
+    VERSION: str = "1.0.0"
+
+    # CORS
+    CORS_ORIGINS: list = ["*"]  # Configure for production
+
+    # Performance
+    QUERY_MIN_LENGTH: int = 2
+    MAX_SUGGESTIONS: int = 5
+    DEBOUNCE_MS: int = 150
+
+
 settings = Settings()
