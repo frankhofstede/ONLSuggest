@@ -39,3 +39,7 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs"
     }
+
+
+# Vercel serverless function handler
+handler = app
