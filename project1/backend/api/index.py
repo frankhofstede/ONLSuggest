@@ -8,6 +8,7 @@ try:
     from database import db
     from template_engine import template_engine
     from dutch_matcher import dutch_matcher
+    from koop_client import koop_client
     DB_AVAILABLE = True
 except ImportError as e:
     DB_AVAILABLE = False
@@ -35,6 +36,17 @@ class handler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+    def _generate_suggestions_from_koop(self, query: str, max_results: int = 5):
+        """
+        Generate suggestions using KOOP API
+        Story 3.2: KOOP API Integration
+        """
+        try:
+            return koop_client.get_suggestions(query, max_results)
+        except Exception as e:
+            print(f"Error calling KOOP API: {e}")
+            return []
 
     def _generate_suggestions_from_database(self, query: str, max_results: int = 5):
         """
@@ -99,8 +111,19 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(error_response).encode())
                 return
 
-            # Try to use database-powered suggestions
+            # Check which suggestion engine to use (Story 3.1 + 3.2)
+            suggestion_engine = "template"  # Default
             if DB_AVAILABLE:
+                try:
+                    # Get the active suggestion engine from settings
+                    suggestion_engine = db.get_setting('suggestion_engine') or 'template'
+                except:
+                    suggestion_engine = "template"  # Fallback to template on error
+
+            # Generate suggestions based on selected engine
+            if suggestion_engine == "koop":
+                suggestions = self._generate_suggestions_from_koop(query, max_results)
+            elif DB_AVAILABLE:
                 suggestions = self._generate_suggestions_from_database(query, max_results)
             else:
                 # Fallback to mock data if database unavailable
@@ -112,7 +135,8 @@ class handler(BaseHTTPRequestHandler):
                 "query": request_data.get('query'),
                 "suggestions": suggestions,
                 "response_time_ms": response_time_ms,
-                "using_database": DB_AVAILABLE
+                "using_database": DB_AVAILABLE,
+                "suggestion_engine": suggestion_engine  # Story 3.2: Show which engine was used
             }
 
             self.send_response(200)
