@@ -119,15 +119,20 @@ def _generate_suggestions_from_database(query: str, max_results: int) -> List[Su
 
     # Match services using Dutch NLP
     matcher = DutchMatcher()
-    matched_services = matcher.match_services(query, services)
+    service_tuples = matcher.match_services(query, services)  # Returns List[Tuple[Dict, float]]
 
-    # Enhance with gemeente information
-    for match in matched_services:
-        service_id = match['service']['id']
+    # Convert tuples to dicts with gemeente information
+    matched_services = []
+    for service_dict, confidence in service_tuples:
         # Find gemeentes offering this service
-        service_associations = [a for a in associations if a['service_id'] == service_id]
-        if service_associations:
-            match['gemeente'] = service_associations[0]['gemeente_name']
+        service_associations = [a for a in associations if a['service_id'] == service_dict['id']]
+        gemeente_name = service_associations[0]['gemeente_name'] if service_associations else None
+
+        matched_services.append({
+            'service': service_dict,
+            'confidence': confidence,
+            'gemeente': gemeente_name
+        })
 
     # Generate question templates
     raw_suggestions = template_engine.generate_suggestions(
