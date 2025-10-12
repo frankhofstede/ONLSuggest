@@ -1,10 +1,10 @@
 # ONLSuggest-v1 Product Requirements Document (PRD)
 
 **Author:** Frank
-**Date:** 2025-10-06
+**Date:** 2025-10-06 (Updated: 2025-10-10)
 **Project Level:** Level 2 (Small complete system)
 **Project Type:** Web application
-**Target Scale:** 8-12 stories, 1-2 epics, 4-8 week MVP
+**Target Scale:** 18 stories, 3 epics, 6-12 week delivery (MVP complete + Epic 3)
 
 ---
 
@@ -61,6 +61,18 @@ Citizens often struggle to find relevant government services because they don't 
 **FR011**: System displays service results/information when a suggested question is selected
 
 **FR012**: Admin users can authenticate to access the admin interface (basic auth for POC)
+
+**FR013**: Admin users can toggle between template engine and KOOP API suggestion engines
+
+**FR014**: System proxies suggestion requests to external KOOP Suggester API when enabled
+
+**FR015**: Suggestions display category badges ("Dienst", "Wegwijzer Overheid") from KOOP API
+
+**FR016**: Users can access pre-configured example queries via URL parameters (?q=query)
+
+**FR017**: Users can click suggestions to view AI-generated document summaries with streaming display
+
+**FR018**: System automatically falls back to template engine if KOOP API is unavailable
 
 ### Non-Functional Requirements
 
@@ -139,7 +151,18 @@ Citizens often struggle to find relevant government services because they don't 
 - Story 2.5: Data validation and duplicate prevention
 - Story 2.6: Basic admin dashboard with data overview
 
-**Total**: 2 epics, 12 stories
+### Epic 3: KOOP Suggester API Integration
+**Goal**: Integrate external KOOP Suggester API as an alternative suggestion engine with admin-controlled feature toggle
+
+**Stories** (6 stories):
+- Story 3.1: Admin feature toggle for suggestion engine selection
+- Story 3.2: KOOP API proxy endpoint
+- Story 3.3: Category-based suggestion display
+- Story 3.4: URL-based question examples
+- Story 3.5: AI document summary with streaming display
+- Story 3.6: Feature flag testing and validation
+
+**Total**: 3 epics, 18 stories (12 complete, 6 pending)
 
 _Note: Detailed user stories with acceptance criteria will be generated in epic-stories.md_
 
@@ -201,6 +224,8 @@ The following features are explicitly out of scope for this POC but may be consi
 **D4**: Stakeholder availability for UX testing and feedback sessions
 
 **D5**: No dependency on existing government systems/APIs (greenfield advantage)
+
+**D6**: KOOP Suggester API availability and accessibility for Epic 3 (https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/v1/suggest)
 
 ---
 

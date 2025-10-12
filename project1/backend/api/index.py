@@ -8,11 +8,12 @@ try:
     from database import db
     from template_engine import template_engine
     from dutch_matcher import dutch_matcher
-    from koop_client import koop_client
+    from koop_client import koop_client, KoopAPIError
     DB_AVAILABLE = True
 except ImportError as e:
     DB_AVAILABLE = False
     DB_ERROR = str(e)
+    KoopAPIError = Exception  # Fallback
 
 class handler(BaseHTTPRequestHandler):
     def _set_cors_headers(self):
@@ -41,12 +42,10 @@ class handler(BaseHTTPRequestHandler):
         """
         Generate suggestions using KOOP API
         Story 3.2: KOOP API Integration
+
+        Note: Raises KoopAPIError on failure - caller should handle fallback
         """
-        try:
-            return koop_client.get_suggestions(query, max_results)
-        except Exception as e:
-            print(f"Error calling KOOP API: {e}")
-            return []
+        return koop_client.get_suggestions(query, max_results)
 
     def _generate_suggestions_from_database(self, query: str, max_results: int = 5):
         """
@@ -120,14 +119,31 @@ class handler(BaseHTTPRequestHandler):
                 except:
                     suggestion_engine = "template"  # Fallback to template on error
 
-            # Generate suggestions based on selected engine
+            # Generate suggestions based on selected engine with fallback
+            fallback_occurred = False
+            fallback_reason = None
+
             if suggestion_engine == "koop":
-                suggestions = self._generate_suggestions_from_koop(query, max_results)
-            elif DB_AVAILABLE:
-                suggestions = self._generate_suggestions_from_database(query, max_results)
-            else:
-                # Fallback to mock data if database unavailable
-                suggestions = self._get_mock_suggestions(query, max_results)
+                try:
+                    suggestions = self._generate_suggestions_from_koop(query, max_results)
+                except KoopAPIError as e:
+                    # Fallback to template engine on KOOP failure
+                    print(f"[WARNING] KOOP API failed, falling back to template: {e}")
+                    suggestion_engine = "template"  # Update for response
+                    fallback_occurred = True
+                    fallback_reason = str(e)
+
+                    if DB_AVAILABLE:
+                        suggestions = self._generate_suggestions_from_database(query, max_results)
+                    else:
+                        suggestions = self._get_mock_suggestions(query, max_results)
+
+            if suggestion_engine == "template":
+                if DB_AVAILABLE:
+                    suggestions = self._generate_suggestions_from_database(query, max_results)
+                else:
+                    # Fallback to mock data if database unavailable
+                    suggestions = self._get_mock_suggestions(query, max_results)
 
             response_time_ms = (time.time() - start_time) * 1000
 
@@ -138,6 +154,11 @@ class handler(BaseHTTPRequestHandler):
                 "using_database": DB_AVAILABLE,
                 "suggestion_engine": suggestion_engine  # Story 3.2: Show which engine was used
             }
+
+            # Add fallback information if applicable
+            if fallback_occurred:
+                response["fallback_occurred"] = True
+                response["fallback_reason"] = fallback_reason
 
             self.send_response(200)
             self._set_cors_headers()

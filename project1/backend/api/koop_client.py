@@ -1,61 +1,120 @@
 """
 KOOP API Client for ONLSuggest
-Mock implementation for Story 3.2 - will be replaced with real API calls
+Real implementation for Story 3.2
 """
 from typing import List, Dict
+import urllib.request
+import urllib.error
+import json
+
+class KoopAPIError(Exception):
+    """Raised when KOOP API call fails"""
+    pass
 
 class KoopAPIClient:
     """Client for KOOP API suggestions"""
 
     def __init__(self):
-        # TODO: Add real API credentials/config in Story 3.2
-        self.api_url = "https://api.koop.overheid.nl/v1/suggestions"  # Placeholder
+        # According to tech spec: use /api/suggest endpoint
+        self.api_url = "https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/api/suggest"
+        self.timeout = 5.0  # 5 second timeout
 
     def get_suggestions(self, query: str, max_results: int = 5) -> List[Dict]:
         """
         Get suggestions from KOOP API
 
-        For now this returns mock data with [KOOP] prefix to show it's working.
-        Story 3.2 will implement real API calls.
-        """
-        # Mock implementation - returns suggestions with [KOOP] prefix
-        mock_suggestions = [
+        KOOP Response format (from tech spec):
+        {
+          "suggestions": [
             {
-                "suggestion": f"[KOOP API] Hoe kan ik informatie vinden over '{query}'?",
-                "confidence": 0.90,
-                "service": {
-                    "id": 9001,
-                    "name": "KOOP Informatieservice",
-                    "description": f"Zoekresultaten voor '{query}' via KOOP API",
-                    "category": "Overheid"
-                },
-                "gemeente": None
-            },
-            {
-                "suggestion": f"[KOOP API] Waar vind ik officiële documenten over '{query}'?",
-                "confidence": 0.85,
-                "service": {
-                    "id": 9002,
-                    "name": "KOOP Documentatie",
-                    "description": "Officiële overheidsdocumentatie",
-                    "category": "Overheid"
-                },
-                "gemeente": None
-            },
-            {
-                "suggestion": f"[KOOP API] Welke regelgeving geldt voor '{query}'?",
-                "confidence": 0.80,
-                "service": {
-                    "id": 9003,
-                    "name": "KOOP Wetgeving",
-                    "description": "Relevante wet- en regelgeving",
-                    "category": "Overheid"
-                },
-                "gemeente": None
+              "category": "Dienst" | "Wegwijzer Overheid",
+              "suggest_entries": [
+                {
+                  "id": "url",
+                  "title": "Display title",
+                  "url": "Direct link",
+                  "uri": "Semantic URI",
+                  "helptext_after_select": "Help text",
+                  "source": "WEGWIJZER" | "UPL"
+                }
+              ]
             }
-        ]
+          ]
+        }
+        """
+        try:
+            # Build request payload
+            payload = {
+                "text": query,
+                "max_items": max_results,
+                "categories": ["Dienst", "Wegwijzer Overheid"]
+            }
 
-        return mock_suggestions[:max_results]
+            # Make HTTP request
+            req = urllib.request.Request(
+                self.api_url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+
+            with urllib.request.urlopen(req, timeout=self.timeout) as response:
+                koop_data = json.loads(response.read().decode('utf-8'))
+
+            # Transform KOOP response to our format
+            return self._transform_response(koop_data, max_results)
+
+        except urllib.error.URLError as e:
+            raise KoopAPIError(f"Network error: {e}")
+        except urllib.error.HTTPError as e:
+            raise KoopAPIError(f"HTTP error {e.code}: {e.reason}")
+        except json.JSONDecodeError as e:
+            raise KoopAPIError(f"Invalid JSON response: {e}")
+        except Exception as e:
+            raise KoopAPIError(f"Unexpected error: {e}")
+
+    def _transform_response(self, koop_data: Dict, max_results: int) -> List[Dict]:
+        """
+        Transform KOOP nested response format to our Suggestion interface
+
+        KOOP has: suggestions[].suggest_entries[]
+        We need: flat list of suggestions
+        """
+        transformed = []
+
+        for category_group in koop_data.get("suggestions", []):
+            category = category_group.get("category", "Dienst")
+
+            for entry in category_group.get("suggest_entries", []):
+                # Extract fields
+                title = entry.get("title", "")
+                uri = entry.get("uri") or entry.get("url") or entry.get("id")
+                helptext = entry.get("helptext_after_select")
+                source = entry.get("source", "UNKNOWN")
+
+                # Create suggestion in our format
+                suggestion = {
+                    "suggestion": title,
+                    "confidence": 0.85,  # KOOP doesn't provide confidence
+                    "category": category,
+                    "uri": uri,
+                    "source": source,
+                    "helptext": helptext,
+                    "service": {
+                        "id": None,  # KOOP doesn't map to our service IDs
+                        "name": title,
+                        "description": helptext or "",
+                        "category": category
+                    },
+                    "gemeente": None  # KOOP is cross-gemeente
+                }
+
+                transformed.append(suggestion)
+
+                # Stop if we have enough
+                if len(transformed) >= max_results:
+                    return transformed
+
+        return transformed
 
 # Global instance
 koop_client = KoopAPIClient()

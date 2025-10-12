@@ -1,20 +1,21 @@
 # ONLSuggest-v1 - Epic Breakdown
 
 **Author:** Frank
-**Date:** 2025-10-06
+**Date:** 2025-10-06 (Updated: 2025-10-10)
 **Project Level:** Level 2 (Small complete system)
-**Target Scale:** 8-12 stories, 1-2 epics, 4-8 week MVP
+**Target Scale:** 18 stories, 3 epics, 6-12 week delivery (MVP complete + Epic 3)
 
 ---
 
 ## Epic Overview
 
-This project consists of 2 core epics that enable citizens to discover municipal services through intelligent query suggestions:
+This project consists of 3 core epics that enable citizens to discover municipal services through intelligent query suggestions:
 
 1. **Query Suggestion Engine** - The core AI/algorithm that transforms partial user input into natural, full-text Dutch questions
 2. **Admin Data Management** - Simple interface for manually curating the gemeente and service data that powers suggestions
+3. **KOOP Suggester API Integration** - Enterprise-grade government API integration with feature toggle for A/B testing and gradual migration
 
-Both epics work together to create a POC that validates the question-based suggestion approach while keeping operational complexity minimal through manual data management.
+Epics 1 and 2 form the foundation POC that validates the question-based suggestion approach. Epic 3 adds government API integration while preserving the template engine as fallback, enabling safe testing and deployment of external services.
 
 ---
 
@@ -277,17 +278,163 @@ Both epics work together to create a POC that validates the question-based sugge
 
 ---
 
+### Epic 3: KOOP Suggester API Integration
+
+**Epic Goal**: Integrate external KOOP Suggester API as an alternative suggestion engine with admin-controlled feature toggle
+
+**Business Value**: Validates enterprise-grade government API integration while maintaining current template engine as fallback, enabling A/B testing and gradual migration strategy
+
+**Dependencies**:
+- Epic 1 complete (existing suggestion system)
+- Epic 2 complete (admin interface)
+- KOOP API production-ready and accessible
+
+**Estimated Effort**: 2-4 weeks
+
+**Strategic Context**: This epic replaces the custom template engine (Epic 1) with the government-provided KOOP Suggester API, adding category-based filtering, URL-based question examples, and AI-generated document summaries. The feature flag approach allows safe deployment, testing, and potential rollback while preserving the MVP investment.
+
+---
+
+#### Story 3.1: Admin Feature Toggle for Suggestion Engine Selection
+
+**As an** admin user
+**I want to** toggle between template engine and KOOP API suggestion engines
+**So that** I can control which suggestion system is active without code deployment
+
+**Acceptance Criteria**:
+- Admin settings page shows "Suggestion Engine" toggle (Template Engine / KOOP API)
+- Current selection persists in database
+- Toggle takes effect immediately for all users
+- Shows current engine status on admin dashboard
+- Default: Template Engine (safe fallback)
+
+**Technical Notes**:
+- Add `suggestion_engine` field to settings table or config
+- Frontend reads engine selection on page load
+- Consider adding "Test KOOP API Connection" button
+
+---
+
+#### Story 3.2: KOOP API Proxy Endpoint
+
+**As a** frontend application
+**I want to** call a backend proxy that communicates with KOOP Suggester API
+**So that** API keys and external calls are hidden from client
+
+**Acceptance Criteria**:
+- New backend endpoint: `POST /api/v1/suggestions/koop`
+- Transforms request format: `{query, max_results}` → `{text, max_items}`
+- Adds optional `categories` and `prev_uris` support
+- Transforms KOOP response → frontend Suggestion interface
+- Returns error with graceful message if KOOP API fails
+- Automatic fallback to template engine on KOOP failure
+
+**Technical Notes**:
+- KOOP API URL: `https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/v1/suggest`
+- Handle DNS/network failures gracefully
+- Log all KOOP API calls for debugging
+- Maintain <200ms response time requirement
+
+---
+
+#### Story 3.3: Category-Based Suggestion Display
+
+**As a** user
+**I want to** see suggestions grouped by category ("Dienst", "Wegwijzer Overheid")
+**So that** I can understand what type of information each suggestion provides
+
+**Acceptance Criteria**:
+- Suggestions display category badge/label
+- Categories visually distinct (color/icon)
+- Can filter suggestions by category (optional)
+- Categories returned from KOOP API mapped correctly
+- Template engine suggestions marked as "Dienst" (backward compatibility)
+
+**Technical Notes**:
+- Update Suggestion TypeScript interface to include `category?: string`
+- CSS styling for category badges
+- KOOP API returns categories in response - validate format
+
+---
+
+#### Story 3.4: URL-Based Question Examples
+
+**As a** user
+**I want to** access pre-configured example queries via URL parameters
+**So that** I can share specific searches or access curated examples
+
+**Acceptance Criteria**:
+- URL parameter `?q=<query>` pre-fills search box
+- Search triggers automatically on page load if `?q=` present
+- URL parameter `?example=<id>` loads predefined example queries
+- Examples configurable in admin interface
+- Browser back button clears pre-filled query
+
+**Technical Notes**:
+- React Router or vanilla URL param parsing
+- Admin CRUD for managing example queries
+- Examples table: `{id, label, query_text, category?}`
+
+---
+
+#### Story 3.5: AI Document Summary with Streaming Display
+
+**As a** user
+**I want to** click a suggestion and see an AI-generated document summary
+**So that** I can preview content before visiting the full page
+
+**Acceptance Criteria**:
+- Clicking suggestion shows summary panel/modal
+- Summary displays incrementally (streaming effect)
+- Shows document title from suggestion metadata
+- "View Full Document" link opens actual service page
+- Close button returns to suggestions
+- Loading state while summary generates
+
+**Technical Notes**:
+- KOOP API likely returns document URI + summary endpoint
+- May require separate API call for summary generation
+- Implement streaming with Server-Sent Events or chunked response
+- Fallback: show service description from database if KOOP unavailable
+
+---
+
+#### Story 3.6: Feature Flag Testing and Validation
+
+**As a** developer/admin
+**I want to** validate both engines work correctly with automated tests
+**So that** feature toggle doesn't break existing functionality
+
+**Acceptance Criteria**:
+- Playwright E2E test for template engine mode
+- Playwright E2E test for KOOP API mode
+- Playwright test for toggle switching
+- Unit tests for API proxy transformation logic
+- Manual test checklist for both engines
+- Performance comparison report (template vs KOOP)
+
+**Technical Notes**:
+- Mock KOOP API responses for E2E tests
+- Test fallback behavior when KOOP unavailable
+- Validate response time <200ms for both engines
+- Test category display with both engines
+
+---
+
 ## Story Status
 
-**Not Started**: All stories
-**In Progress**: None
-**Completed**: None
+**Epic 1 & 2**: Completed (MVP delivered)
+**Epic 3**: Not Started
+**Total Stories**: 18 (12 complete, 6 pending)
 
 ---
 
 ## Next Steps
 
-1. Prioritize stories for Sprint 1
-2. Estimate story points
-3. Assign to developers
-4. Begin Epic 1 Story 1.1 or Epic 2 Story 2.1 (can be parallel)
+**For Epic 3 Implementation:**
+
+1. Review Epic 3 stories with stakeholders
+2. Create tech-spec-epic-3.md (solution architecture)
+3. Estimate story points for Epic 3
+4. Prioritize Epic 3 stories for Sprint
+5. Begin Epic 3 Story 3.1 (Feature Toggle)
