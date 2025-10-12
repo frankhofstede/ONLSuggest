@@ -1,17 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/main.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/main.py"
-    }
-  ],
   "env": {
     "KOOP_API_URL": "https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/api/suggest"
   }
