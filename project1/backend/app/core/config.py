@@ -30,8 +30,8 @@ class Settings:
     MAX_SUGGESTIONS: int = 5
 
     # Suggestion Engine (template requires database, koop uses external API)
-    # Default to koop for fast response times
-    SUGGESTION_ENGINE: str = os.getenv("SUGGESTION_ENGINE", "koop")
+    # KOOP API not accessible from Vercel, use template
+    SUGGESTION_ENGINE: str = os.getenv("SUGGESTION_ENGINE", "template")
 
 
 settings = Settings()
