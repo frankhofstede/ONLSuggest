@@ -62,19 +62,24 @@ async def get_suggestions(request: SuggestionRequest):
             detail=f"Query must be at least {settings.QUERY_MIN_LENGTH} characters"
         )
 
-    # Check which engine to use (template or KOOP)
-    suggestion_engine = db.get_setting('suggestion_engine') or 'template'
+    # Check which engine to use (template or KOOP) - from config, not database
+    suggestion_engine = settings.SUGGESTION_ENGINE
+
+    # Check if database is available
+    database_available = bool(settings.DATABASE_URL)
 
     # Generate suggestions
     try:
-        if suggestion_engine == "koop":
-            # Try KOOP API first
+        if suggestion_engine == "koop" or not database_available:
+            # Use KOOP API if explicitly configured OR if database is not available
             koop_client = KoopAPIClient()
             suggestions = _generate_suggestions_from_koop(
                 koop_client,
                 request.query,
                 request.max_results
             )
+            if not database_available:
+                suggestion_engine = "koop (no database)"
         else:
             # Use template engine with database
             suggestions = _generate_suggestions_from_database(
@@ -82,12 +87,26 @@ async def get_suggestions(request: SuggestionRequest):
                 request.max_results
             )
     except Exception as e:
-        # Fallback to database if KOOP fails
-        suggestions = _generate_suggestions_from_database(
-            request.query,
-            request.max_results
-        )
-        suggestion_engine = "template (fallback)"
+        # Fallback: try KOOP if database fails, or return error if KOOP also fails
+        if database_available:
+            try:
+                koop_client = KoopAPIClient()
+                suggestions = _generate_suggestions_from_koop(
+                    koop_client,
+                    request.query,
+                    request.max_results
+                )
+                suggestion_engine = "koop (fallback)"
+            except Exception as koop_error:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"Both database and KOOP API failed: {str(e)}, {str(koop_error)}"
+                )
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail=f"KOOP API failed and no database available: {str(e)}"
+            )
 
     response_time = (time.time() - start_time) * 1000
 
@@ -95,7 +114,7 @@ async def get_suggestions(request: SuggestionRequest):
         query=request.query,
         suggestions=suggestions,
         response_time_ms=round(response_time, 2),
-        using_database=True,
+        using_database=database_available and "koop" not in suggestion_engine,
         suggestion_engine=suggestion_engine
     )
 
@@ -154,15 +173,18 @@ def _generate_suggestions_from_koop(
     # Convert KOOP results to our format
     suggestions = []
     for result in koop_results:
+        # Extract service info from the result
+        service_data = result.get('service', {})
+
         suggestions.append(
             Suggestion(
                 suggestion=result.get('suggestion', ''),
                 confidence=result.get('confidence', 0.5),
                 service=ServiceInfo(
-                    id=0,  # KOOP doesn't provide IDs
-                    name=result.get('service', ''),
-                    description=result.get('description', ''),
-                    category=result.get('category', 'Algemeen')
+                    id=service_data.get('id') or 0,
+                    name=service_data.get('name', ''),
+                    description=service_data.get('description', ''),
+                    category=service_data.get('category', 'Algemeen')
                 ),
                 gemeente=result.get('gemeente')
             )

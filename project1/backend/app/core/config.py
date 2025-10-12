@@ -29,5 +29,8 @@ class Settings:
     QUERY_MIN_LENGTH: int = 2
     MAX_SUGGESTIONS: int = 5
 
+    # Suggestion Engine
+    SUGGESTION_ENGINE: str = os.getenv("SUGGESTION_ENGINE", "template")
+
 
 settings = Settings()
