@@ -4,19 +4,18 @@ Health check routes
 from fastapi import APIRouter
 import sys
 
-from app.core.config import settings
-from app.models.database import db
+from api.core.config import settings
+from api.models.database import db
 
 router = APIRouter()
 
 
-@router.get("/health")
+@router.get("/api/health")
 async def health_check():
     """
     Health check endpoint
-    Returns system status and module availability
+    Returns system status and database availability
     """
-    # Check database connectivity
     db_available = False
     db_error = None
     try:

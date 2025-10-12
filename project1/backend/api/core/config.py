@@ -3,7 +3,6 @@ Application configuration
 BMAD-compliant settings management
 """
 import os
-from typing import Optional
 
 
 class Settings:
@@ -20,20 +19,15 @@ class Settings:
 
     # Admin credentials
     ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
-    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123")
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "onlsuggest2024")
 
     # API settings
-    API_V1_PREFIX: str = "/api"
     PROJECT_NAME: str = "ONLSuggest"
     VERSION: str = "1.0.0"
-
-    # CORS
-    CORS_ORIGINS: list = ["*"]  # Configure for production
 
     # Performance
     QUERY_MIN_LENGTH: int = 2
     MAX_SUGGESTIONS: int = 5
-    DEBOUNCE_MS: int = 150
 
 
 settings = Settings()

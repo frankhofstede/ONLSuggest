@@ -1,14 +1,14 @@
 """
 Database operations for ONLSuggest
 Uses psycopg2 for PostgreSQL (Neon)
+BMAD-compliant database layer
 """
-import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from typing import List, Dict, Any, Optional
 from contextlib import contextmanager
 
-from app.core.config import settings
+from api.core.config import settings
 
 
 @contextmanager
@@ -41,7 +41,7 @@ class Database:
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
-                    "SELECT id, name, metadata, created_at FROM gemeentes WHERE id = %s",
+                    "SELECT * FROM gemeentes WHERE id = %s",
                     (gemeente_id,)
                 )
                 row = cur.fetchone()
@@ -65,7 +65,6 @@ class Database:
         """Update a gemeente"""
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                # Build update query dynamically
                 fields = []
                 values = {}
                 for key, value in data.items():
@@ -87,9 +86,7 @@ class Database:
         """Delete a gemeente"""
         with get_connection() as conn:
             with conn.cursor() as cur:
-                # Delete associated associations first
                 cur.execute("DELETE FROM associations WHERE gemeente_id = %s", (gemeente_id,))
-                # Delete gemeente
                 cur.execute("DELETE FROM gemeentes WHERE id = %s", (gemeente_id,))
                 return cur.rowcount > 0
 
@@ -106,7 +103,7 @@ class Database:
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
-                    "SELECT id, name, description, category, keywords, created_at FROM services WHERE id = %s",
+                    "SELECT * FROM services WHERE id = %s",
                     (service_id,)
                 )
                 row = cur.fetchone()
@@ -130,7 +127,6 @@ class Database:
         """Update a service"""
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                # Build update query dynamically
                 fields = []
                 values = {}
                 for key, value in data.items():
@@ -152,9 +148,7 @@ class Database:
         """Delete a service"""
         with get_connection() as conn:
             with conn.cursor() as cur:
-                # Delete associated associations first
                 cur.execute("DELETE FROM associations WHERE service_id = %s", (service_id,))
-                # Delete service
                 cur.execute("DELETE FROM services WHERE id = %s", (service_id,))
                 return cur.rowcount > 0
 
@@ -180,33 +174,13 @@ class Database:
                 )
                 return [dict(row) for row in cur.fetchall()]
 
-    def get_associations_by_gemeente(self, gemeente_id: int) -> List[Dict[str, Any]]:
-        """Get associations for a specific gemeente"""
-        with get_connection() as conn:
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute(
-                    "SELECT id, gemeente_id, service_id, created_at FROM associations WHERE gemeente_id = %s",
-                    (gemeente_id,)
-                )
-                return [dict(row) for row in cur.fetchall()]
-
-    def get_associations_by_service(self, service_id: int) -> List[Dict[str, Any]]:
-        """Get associations for a specific service"""
-        with get_connection() as conn:
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute(
-                    "SELECT id, gemeente_id, service_id, created_at FROM associations WHERE service_id = %s",
-                    (service_id,)
-                )
-                return [dict(row) for row in cur.fetchall()]
-
     def create_association(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new association"""
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 # Check if already exists
                 cur.execute(
-                    "SELECT id, gemeente_id, service_id, created_at FROM associations WHERE gemeente_id = %s AND service_id = %s",
+                    "SELECT * FROM associations WHERE gemeente_id = %s AND service_id = %s",
                     (data['gemeente_id'], data['service_id'])
                 )
                 existing = cur.fetchone()
