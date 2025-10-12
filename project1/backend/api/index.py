@@ -3,17 +3,41 @@ import json
 import time
 from urllib.parse import urlparse, parse_qs
 
-# Import our custom modules
+# Import our custom modules with isolated error handling
+# Database import (highest priority - isolated from other modules)
+db = None
+DB_AVAILABLE = False
+DB_ERROR = None
+
 try:
     from database import db
+    if db is not None:
+        DB_AVAILABLE = True
+except Exception as e:
+    DB_ERROR = f"Database import failed: {str(e)}"
+    print(f"[ERROR] Database import failed: {e}")
+
+# Optional suggestion engine modules (isolated imports)
+template_engine = None
+dutch_matcher = None
+koop_client = None
+KoopAPIError = Exception  # Fallback
+
+try:
     from template_engine import template_engine
+except Exception as e:
+    print(f"[WARNING] template_engine not available: {e}")
+
+try:
     from dutch_matcher import dutch_matcher
+except Exception as e:
+    print(f"[WARNING] dutch_matcher not available: {e}")
+
+try:
     from koop_client import koop_client, KoopAPIError
-    DB_AVAILABLE = True
-except ImportError as e:
-    DB_AVAILABLE = False
-    DB_ERROR = str(e)
-    KoopAPIError = Exception  # Fallback
+except Exception as e:
+    print(f"[WARNING] koop_client not available: {e}")
+    KoopAPIError = Exception  # Keep fallback
 
 class handler(BaseHTTPRequestHandler):
     def _set_cors_headers(self):
@@ -32,7 +56,30 @@ class handler(BaseHTTPRequestHandler):
             self._set_cors_headers()
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            response = {"status": "healthy", "version": "0.1.0", "service": "ONLSuggest API"}
+
+            # Enhanced diagnostics for troubleshooting
+            import sys
+            import os
+
+            response = {
+                "status": "healthy",
+                "version": "0.2.0",
+                "service": "ONLSuggest API",
+                "database": {
+                    "available": DB_AVAILABLE,
+                    "error": DB_ERROR,
+                    "db_object_loaded": db is not None
+                },
+                "modules": {
+                    "template_engine": template_engine is not None,
+                    "dutch_matcher": dutch_matcher is not None,
+                    "koop_client": koop_client is not None
+                },
+                "environment": {
+                    "python_version": sys.version.split()[0],
+                    "cwd": os.getcwd()
+                }
+            }
             self.wfile.write(json.dumps(response).encode())
         else:
             self.send_response(404)
