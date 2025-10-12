@@ -6,6 +6,7 @@ from typing import List, Dict
 import urllib.request
 import urllib.error
 import json
+import ssl
 
 class KoopAPIError(Exception):
     """Raised when KOOP API call fails"""
@@ -18,6 +19,12 @@ class KoopAPIClient:
         # According to tech spec: use /api/suggest endpoint
         self.api_url = "https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/api/suggest"
         self.timeout = 5.0  # 5 second timeout
+
+        # Create SSL context that doesn't verify certificates for test environment
+        # In production, this should be removed or use proper certificate verification
+        self.ssl_context = ssl.create_default_context()
+        self.ssl_context.check_hostname = False
+        self.ssl_context.verify_mode = ssl.CERT_NONE
 
     def get_suggestions(self, query: str, max_results: int = 5) -> List[Dict]:
         """
@@ -57,7 +64,7 @@ class KoopAPIClient:
                 headers={'Content-Type': 'application/json'}
             )
 
-            with urllib.request.urlopen(req, timeout=self.timeout) as response:
+            with urllib.request.urlopen(req, timeout=self.timeout, context=self.ssl_context) as response:
                 koop_data = json.loads(response.read().decode('utf-8'))
 
             # Transform KOOP response to our format
