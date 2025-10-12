@@ -3,10 +3,8 @@ KOOP API Client for ONLSuggest
 Real implementation for Story 3.2
 """
 from typing import List, Dict
-import urllib.request
-import urllib.error
+import requests
 import json
-import ssl
 
 class KoopAPIError(Exception):
     """Raised when KOOP API call fails"""
@@ -19,12 +17,6 @@ class KoopAPIClient:
         # According to tech spec: use /api/suggest endpoint
         self.api_url = "https://onl-suggester.koop-innovatielab-tst.test5.s15m.nl/api/suggest"
         self.timeout = 5.0  # 5 second timeout
-
-        # Create SSL context that doesn't verify certificates for test environment
-        # In production, this should be removed or use proper certificate verification
-        self.ssl_context = ssl.create_default_context()
-        self.ssl_context.check_hostname = False
-        self.ssl_context.verify_mode = ssl.CERT_NONE
 
     def get_suggestions(self, query: str, max_results: int = 5) -> List[Dict]:
         """
@@ -57,23 +49,23 @@ class KoopAPIClient:
                 "categories": ["Dienst", "Wegwijzer Overheid"]
             }
 
-            # Make HTTP request
-            req = urllib.request.Request(
+            # Make HTTP request using requests library (works in serverless)
+            response = requests.post(
                 self.api_url,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={'Content-Type': 'application/json'}
+                json=payload,
+                timeout=self.timeout,
+                verify=False  # Skip SSL verification for test environment
             )
-
-            with urllib.request.urlopen(req, timeout=self.timeout, context=self.ssl_context) as response:
-                koop_data = json.loads(response.read().decode('utf-8'))
+            response.raise_for_status()
+            koop_data = response.json()
 
             # Transform KOOP response to our format
             return self._transform_response(koop_data, max_results)
 
-        except urllib.error.URLError as e:
+        except requests.exceptions.Timeout as e:
+            raise KoopAPIError(f"Request timeout: {e}")
+        except requests.exceptions.RequestException as e:
             raise KoopAPIError(f"Network error: {e}")
-        except urllib.error.HTTPError as e:
-            raise KoopAPIError(f"HTTP error {e.code}: {e.reason}")
         except json.JSONDecodeError as e:
             raise KoopAPIError(f"Invalid JSON response: {e}")
         except Exception as e:
