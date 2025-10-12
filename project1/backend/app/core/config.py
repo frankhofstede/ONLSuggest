@@ -30,7 +30,7 @@ class Settings:
     MAX_SUGGESTIONS: int = 5
 
     # Suggestion Engine (template requires database, koop uses external API)
-    SUGGESTION_ENGINE: str = os.getenv("SUGGESTION_ENGINE", "koop")
+    SUGGESTION_ENGINE: str = os.getenv("SUGGESTION_ENGINE", "template")
 
 
 settings = Settings()
